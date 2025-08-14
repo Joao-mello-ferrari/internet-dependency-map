@@ -1,11 +1,3 @@
-// Declarações de tipos globais para Leaflet
-declare global {
-  interface Window {
-    L: typeof import('leaflet');
-  }
-}
-
-// Declarações para módulos CSS
 declare module '*.css' {
   const content: string;
   export default content;
@@ -15,5 +7,3 @@ declare module 'leaflet/dist/leaflet.css' {
   const content: string;
   export default content;
 }
-
-export {};
