@@ -1,6 +1,7 @@
-import React from 'react';
-import styled from 'styled-components';
-import type { FilterOptions, CDN, ContentClass } from '../types';
+import React from "react";
+import styled from "styled-components";
+import { useTranslation } from "react-i18next";
+import type { FilterOptions, CDN, ContentClass } from "../types";
 
 interface FilterPanelProps {
   filters: FilterOptions;
@@ -14,7 +15,7 @@ interface FilterPanelProps {
 const FilterWrapper = styled.div<{ isOpen: boolean }>`
   position: fixed;
   top: 0;
-  left: ${props => props.isOpen ? '0' : '-350px'};
+  left: ${(props) => (props.isOpen ? "0" : "-350px")};
   width: 350px;
   height: 100vh;
   background: #2e3440;
@@ -29,7 +30,7 @@ const FilterWrapper = styled.div<{ isOpen: boolean }>`
 const FilterToggle = styled.button<{ isOpen: boolean }>`
   position: fixed;
   top: 50%;
-  left: ${props => props.isOpen ? '350px' : '0'};
+  left: ${(props) => (props.isOpen ? "350px" : "0")};
   transform: translateY(-50%);
   background: #5e81ac;
   border: none;
@@ -71,7 +72,7 @@ const FilterHeader = styled.div`
     cursor: pointer;
     font-size: 12px;
     margin-top: 10px;
-    
+
     &:hover {
       background: #d08770;
     }
@@ -228,23 +229,24 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   contentClasses,
   onFiltersChange,
   isOpen,
-  onToggle
+  onToggle,
 }) => {
+  const { t } = useTranslation();
   // Removida função handleCountryChange
 
   const handleCDNChange = (cdnId: string, checked: boolean) => {
     const updatedCDNs = checked
       ? [...filters.cdns, cdnId]
-      : filters.cdns.filter(id => id !== cdnId);
-    
+      : filters.cdns.filter((id) => id !== cdnId);
+
     onFiltersChange({ ...filters, cdns: updatedCDNs });
   };
 
   const handleContentClassChange = (classId: string, checked: boolean) => {
     const updatedClasses = checked
       ? [...filters.contentClasses, classId]
-      : filters.contentClasses.filter(id => id !== classId);
-    
+      : filters.contentClasses.filter((id) => id !== classId);
+
     onFiltersChange({ ...filters, contentClasses: updatedClasses });
   };
 
@@ -254,7 +256,9 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
     onFiltersChange({ ...filters, intensityRange: newRange });
   };
 
-  const handleRelationTypeChange = (type: 'all' | 'dependency' | 'provision') => {
+  const handleRelationTypeChange = (
+    type: "all" | "dependency" | "provision"
+  ) => {
     onFiltersChange({ ...filters, relationType: type });
   };
 
@@ -264,27 +268,27 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
       protocols: [],
       contentClasses: [],
       intensityRange: [0, 100],
-      relationType: 'all'
+      relationType: "all",
     });
   };
 
   // Calcular contadores para exibir nos filtros
   const activeFiltersCount = {
     cdns: filters.cdns.length,
-    contentClasses: filters.contentClasses.length
+    contentClasses: filters.contentClasses.length,
   };
 
   return (
     <>
       <FilterToggle isOpen={isOpen} onClick={onToggle}>
-        {isOpen ? '◀ Ocultar' : '▶ Filtros'}
+        {isOpen ? `◀ ${t("common.none")}` : `▶ ${t("filters.toggle")}`}
       </FilterToggle>
 
       <FilterWrapper isOpen={isOpen}>
         <FilterHeader>
-          <h2>Filtros Avançados</h2>
+          <h2>{t("filters.title")}</h2>
           <button className="reset-btn" onClick={resetFilters}>
-            Limpar Todos os Filtros
+            {t("filters.reset")}
           </button>
         </FilterHeader>
 
@@ -292,9 +296,12 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
           {/* Removida seção de filtro de países - países são selecionados diretamente no mapa */}
 
           <FilterSection>
-            <h3>CDNs ({activeFiltersCount.cdns} selecionados)</h3>
+            <h3>
+              {t("filters.cdns")} ({activeFiltersCount.cdns}{" "}
+              {t("common.select")})
+            </h3>
             <MultiSelect>
-              {cdns.map(cdn => (
+              {cdns.map((cdn) => (
                 <SelectOption key={cdn.id}>
                   <input
                     type="checkbox"
@@ -309,16 +316,24 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
           </FilterSection>
 
           <FilterSection>
-            <h3>Classes de Conteúdo ({activeFiltersCount.contentClasses} selecionadas)</h3>
+            <h3>
+              {t("filters.contentClasses")} ({activeFiltersCount.contentClasses}{" "}
+              {t("common.select")})
+            </h3>
             <MultiSelect>
-              {contentClasses.map(contentClass => (
+              {contentClasses.map((contentClass) => (
                 <SelectOption key={contentClass.id}>
                   <input
                     type="checkbox"
                     checked={filters.contentClasses.includes(contentClass.id)}
-                    onChange={(e) => handleContentClassChange(contentClass.id, e.target.checked)}
+                    onChange={(e) =>
+                      handleContentClassChange(
+                        contentClass.id,
+                        e.target.checked
+                      )
+                    }
                   />
-                  {contentClass.name}
+                  {t(`contentClassCategories.${contentClass.category}`)}
                   <span className="option-count">{contentClass.category}</span>
                 </SelectOption>
               ))}
@@ -326,19 +341,21 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
           </FilterSection>
 
           <FilterSection>
-            <h3>Intensidade da Relação</h3>
+            <h3>{t("filters.intensityRange")}</h3>
             <RangeSlider>
               <div className="range-container">
                 <div className="range-labels">
-                  <span>Mínima</span>
-                  <span>Máxima</span>
+                  <span>{t("filters.minimum")}</span>
+                  <span>{t("filters.maximum")}</span>
                 </div>
                 <input
                   type="range"
                   min={0}
                   max={100}
                   value={filters.intensityRange[0]}
-                  onChange={(e) => handleIntensityRangeChange(0, parseInt(e.target.value))}
+                  onChange={(e) =>
+                    handleIntensityRangeChange(0, parseInt(e.target.value))
+                  }
                   className="range-input"
                 />
                 <input
@@ -346,7 +363,9 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                   min={0}
                   max={100}
                   value={filters.intensityRange[1]}
-                  onChange={(e) => handleIntensityRangeChange(1, parseInt(e.target.value))}
+                  onChange={(e) =>
+                    handleIntensityRangeChange(1, parseInt(e.target.value))
+                  }
                   className="range-input"
                 />
                 <div className="range-values">
@@ -358,27 +377,27 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
           </FilterSection>
 
           <FilterSection>
-            <h3>Tipo de Relação</h3>
+            <h3>{t("filters.relationshipTypes")}</h3>
             <RadioGroup>
               <RadioOption>
                 <input
                   type="radio"
                   name="relationType"
                   value="all"
-                  checked={filters.relationType === 'all'}
-                  onChange={() => handleRelationTypeChange('all')}
+                  checked={filters.relationType === "all"}
+                  onChange={() => handleRelationTypeChange("all")}
                 />
-                Todas as Relações
+                {t("common.all")}
               </RadioOption>
               <RadioOption>
                 <input
                   type="radio"
                   name="relationType"
                   value="dependency"
-                  checked={filters.relationType === 'dependency'}
-                  onChange={() => handleRelationTypeChange('dependency')}
+                  checked={filters.relationType === "dependency"}
+                  onChange={() => handleRelationTypeChange("dependency")}
                 />
-                Apenas Dependências
+                {t("filters.dependencies")}
                 <span className="radio-count">Vermelho</span>
               </RadioOption>
               <RadioOption>
@@ -386,10 +405,10 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                   type="radio"
                   name="relationType"
                   value="provision"
-                  checked={filters.relationType === 'provision'}
-                  onChange={() => handleRelationTypeChange('provision')}
+                  checked={filters.relationType === "provision"}
+                  onChange={() => handleRelationTypeChange("provision")}
                 />
-                Apenas Provisões
+                {t("filters.provisions")}
                 <span className="radio-count">Verde</span>
               </RadioOption>
             </RadioGroup>
@@ -399,15 +418,15 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
             <div className="summary-title">Resumo dos Filtros</div>
             {/* Removido resumo de países - países são selecionados diretamente no mapa */}
             <div className="summary-item">
-              <span>CDNs:</span>
+              <span>{t("filters.cdns")}:</span>
               <span className="summary-value">
-                {activeFiltersCount.cdns || 'Todos'}
+                {activeFiltersCount.cdns || t("common.all")}
               </span>
             </div>
             <div className="summary-item">
-              <span>Classes:</span>
+              <span>{t("filters.contentClasses")}:</span>
               <span className="summary-value">
-                {activeFiltersCount.contentClasses || 'Todas'}
+                {activeFiltersCount.contentClasses || t("common.all")}
               </span>
             </div>
             <div className="summary-item">
@@ -419,8 +438,11 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
             <div className="summary-item">
               <span>Tipo:</span>
               <span className="summary-value">
-                {filters.relationType === 'all' ? 'Todas' : 
-                 filters.relationType === 'dependency' ? 'Dependências' : 'Provisões'}
+                {filters.relationType === "all"
+                  ? t("common.all")
+                  : filters.relationType === "dependency"
+                  ? t("filters.dependencies")
+                  : t("filters.provisions")}
               </span>
             </div>
           </FilterSummary>

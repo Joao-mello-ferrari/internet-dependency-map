@@ -1,11 +1,13 @@
-import { useState } from 'react';
-import styled, { createGlobalStyle } from 'styled-components';
-import { WorldMap } from './components/WorldMap';
-import { SidePanel } from './components/SidePanel';
-import { FilterPanel } from './components/FilterPanel';
-import { mockData } from './data/mockData';
-import type { FilterOptions, DependencyRelation } from './types';
-import 'leaflet/dist/leaflet.css';
+import { useState } from "react";
+import styled, { createGlobalStyle } from "styled-components";
+import { useTranslation } from "react-i18next";
+import { WorldMap } from "./components/WorldMap";
+import { SidePanel } from "./components/SidePanel";
+import { FilterPanel } from "./components/FilterPanel";
+import LanguageSwitcher from "./components/LanguageSwitcher";
+import { mockData } from "./data/mockData";
+import type { FilterOptions, DependencyRelation } from "./types";
+import "leaflet/dist/leaflet.css";
 
 // Global styles para reset e tema escuro
 const GlobalStyle = createGlobalStyle`
@@ -92,6 +94,13 @@ const Header = styled.header`
   position: relative;
   z-index: 1000;
   flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .header-content {
+    flex: 1;
+  }
 
   h1 {
     color: #88c0d0;
@@ -108,13 +117,10 @@ const Header = styled.header`
   }
 
   .project-info {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
     text-align: right;
     font-size: 12px;
     color: #81a1c1;
+    margin-left: 20px;
   }
 `;
 
@@ -133,7 +139,7 @@ const LoadingOverlay = styled.div<{ visible: boolean }>`
   right: 0;
   bottom: 0;
   background: rgba(30, 30, 46, 0.8);
-  display: ${props => props.visible ? 'flex' : 'none'};
+  display: ${(props) => (props.visible ? "flex" : "none")};
   align-items: center;
   justify-content: center;
   z-index: 2000;
@@ -146,8 +152,12 @@ const LoadingOverlay = styled.div<{ visible: boolean }>`
   }
 
   @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
 `;
 
@@ -183,6 +193,7 @@ const EmptyState = styled.div`
 `;
 
 function App() {
+  const { t } = useTranslation();
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -191,25 +202,33 @@ function App() {
     protocols: [],
     contentClasses: [],
     intensityRange: [0, 100],
-    relationType: 'all'
+    relationType: "all",
   });
 
   // Debug: Verificar dados carregados
-  console.log('📊 APP.TSX - Dados carregados:');
-  console.log('📊 Países disponíveis:', mockData.countries.map(c => `${c.id} (${c.name})`));
-  console.log('📊 Total de relações:', mockData.relations.length);
-  console.log('📊 Amostra de relações Brasil:', mockData.relations.filter(r => r.fromCountry === 'BR' || r.toCountry === 'BR'));
-  console.log('📊 Estado atual selectedCountry:', selectedCountry);
+  console.log("📊 APP.TSX - Dados carregados:");
+  console.log(
+    "📊 Países disponíveis:",
+    mockData.countries.map((c) => `${c.id} (${c.name})`)
+  );
+  console.log("📊 Total de relações:", mockData.relations.length);
+  console.log(
+    "📊 Amostra de relações Brasil:",
+    mockData.relations.filter(
+      (r) => r.fromCountry === "BR" || r.toCountry === "BR"
+    )
+  );
+  console.log("📊 Estado atual selectedCountry:", selectedCountry);
 
   const handleCountryClick = (countryCode: string) => {
-    console.log('🚀 APP.TSX - handleCountryClick chamado com:', countryCode);
-    console.log('🚀 Estado atual selectedCountry:', selectedCountry);
-    
+    console.log("🚀 APP.TSX - handleCountryClick chamado com:", countryCode);
+    console.log("🚀 Estado atual selectedCountry:", selectedCountry);
+
     setIsLoading(true);
     // Simular carregamento de dados
     setTimeout(() => {
       const newSelection = countryCode === selectedCountry ? null : countryCode;
-      console.log('🚀 Novo estado selectedCountry:', newSelection);
+      console.log("🚀 Novo estado selectedCountry:", newSelection);
       setSelectedCountry(newSelection);
       setIsLoading(false);
     }, 500);
@@ -229,47 +248,62 @@ function App() {
   };
 
   // Filtrar relações baseado nos filtros ativos
-  const filteredRelations = mockData.relations.filter(relation => {
+  const filteredRelations = mockData.relations.filter((relation) => {
     // Removido filtro de países - agora países são selecionados diretamente no mapa
     if (filters.cdns.length && !filters.cdns.includes(relation.cdnProvider)) {
       return false;
     }
-    if (filters.protocols.length && !filters.protocols.includes(relation.protocol.type)) {
+    if (
+      filters.protocols.length &&
+      !filters.protocols.includes(relation.protocol.type)
+    ) {
       return false;
     }
-    if (filters.contentClasses.length && !filters.contentClasses.includes(relation.contentClass)) {
+    if (
+      filters.contentClasses.length &&
+      !filters.contentClasses.includes(relation.contentClass)
+    ) {
       return false;
     }
-    if (relation.intensity < filters.intensityRange[0] || relation.intensity > filters.intensityRange[1]) {
+    if (
+      relation.intensity < filters.intensityRange[0] ||
+      relation.intensity > filters.intensityRange[1]
+    ) {
       return false;
     }
-    if (filters.relationType !== 'all' && relation.type !== filters.relationType) {
+    if (
+      filters.relationType !== "all" &&
+      relation.type !== filters.relationType
+    ) {
       return false;
     }
     return true;
   });
 
-  const hasActiveFilters = filters.cdns.length > 0 || 
-                          filters.protocols.length > 0 || 
-                          filters.contentClasses.length > 0 || 
-                          filters.intensityRange[0] > 0 || 
-                          filters.intensityRange[1] < 100 ||
-                          filters.relationType !== 'all';
+  const hasActiveFilters =
+    filters.cdns.length > 0 ||
+    filters.protocols.length > 0 ||
+    filters.contentClasses.length > 0 ||
+    filters.intensityRange[0] > 0 ||
+    filters.intensityRange[1] < 100 ||
+    filters.relationType !== "all";
 
-  const shouldShowEmptyState = hasActiveFilters && filteredRelations.length === 0;
+  const shouldShowEmptyState =
+    hasActiveFilters && filteredRelations.length === 0;
 
   return (
     <>
       <GlobalStyle />
       <AppContainer>
         <Header>
-          <h1>Sistema de Análise de Dependências CDN</h1>
-          <p className="subtitle">
-            Visualização interativa de relações entre países, CDNs e protocolos de rede
-          </p>
+          <div className="header-content">
+            <h1>{t("app.title")}</h1>
+            <p className="subtitle">{t("app.subtitle")}</p>
+          </div>
+          <LanguageSwitcher />
           <div className="project-info">
-            <div>Estágio Obrigatório - FURG</div>
-            <div>Sistema de Pesquisa em Redes</div>
+            <div>{t("app.projectInfo.internship")}</div>
+            <div>{t("app.projectInfo.researchSystem")}</div>
           </div>
         </Header>
 
@@ -285,15 +319,16 @@ function App() {
 
           <LoadingOverlay visible={isLoading}>
             <span className="loading-spinner">⟳</span>
-            Carregando dados do país...
+            {t("common.loading")}
           </LoadingOverlay>
 
           {shouldShowEmptyState && (
             <EmptyState>
-              <h3>Nenhuma relação encontrada</h3>
+              <h3>{t("common.noData")}</h3>
               <p>Os filtros aplicados não retornaram nenhum resultado.</p>
               <p className="suggestion">
-                Tente ajustar os filtros ou limpar algumas seleções para ver mais dados.
+                Tente ajustar os filtros ou limpar algumas seleções para ver
+                mais dados.
               </p>
             </EmptyState>
           )}

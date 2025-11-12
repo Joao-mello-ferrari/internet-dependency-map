@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { useTranslation } from "react-i18next";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -263,24 +264,28 @@ const ChartContainer = styled.div`
 
 export const SidePanel: React.FC<SidePanelProps> = ({
   selectedCountry,
-  countries,
+  countries: _countries,
   relations,
   cdns,
   contentClasses,
   onClose,
 }) => {
+  const { t } = useTranslation();
+
   if (!selectedCountry) return null;
 
-  const country = countries.find((c) => c.id === selectedCountry);
   const countryRelations = relations.filter(
     (r) => r.fromCountry === selectedCountry || r.toCountry === selectedCountry
   );
 
+  // Separar relações onde o país é dependente (precisa de algo)
   const dependencies = countryRelations.filter(
     (r) => r.fromCountry === selectedCountry && r.type === "dependency"
   );
+
+  // Separar relações onde o país é provedor (oferece algo)
   const provisions = countryRelations.filter(
-    (r) => r.toCountry === selectedCountry && r.type === "provision"
+    (r) => r.fromCountry === selectedCountry && r.type === "provision"
   );
 
   const avgIntensity =
@@ -358,7 +363,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
     <PanelWrapper isOpen={!!selectedCountry}>
       <PanelHeader>
         <h2>
-          {country?.name || selectedCountry}
+          {t(`countries.${selectedCountry}`)}
           <button className="close-btn" onClick={onClose}>
             ✕
           </button>
@@ -367,14 +372,14 @@ export const SidePanel: React.FC<SidePanelProps> = ({
 
       <PanelContent>
         <Section>
-          <h3>Estatísticas</h3>
+          <h3>{t("sidePanel.overview")}</h3>
           <StatGrid>
             <StatCard className="dependency">
-              <div className="label">Dependências</div>
+              <div className="label">{t("sidePanel.dependencies")}</div>
               <div className="value">{dependencies.length}</div>
             </StatCard>
             <StatCard className="provision">
-              <div className="label">Provisões</div>
+              <div className="label">{t("sidePanel.provisions")}</div>
               <div className="value">{provisions.length}</div>
             </StatCard>
             <StatCard>
@@ -382,34 +387,38 @@ export const SidePanel: React.FC<SidePanelProps> = ({
               <div className="value">{countryRelations.length}</div>
             </StatCard>
             <StatCard className="intensity">
-              <div className="label">Intensidade Média</div>
+              <div className="label">{t("sidePanel.criticalityLevel")}</div>
               <div className="value">{avgIntensity}%</div>
             </StatCard>
           </StatGrid>
 
           <ColorLegend>
-            <h4>Legenda de Cores</h4>
+            <h4>{t("sidePanel.colorLegend")}</h4>
             <div className="legend-item dependency">
               <div className="color-indicator"></div>
-              <span>Dependência (vermelho)</span>
+              <span>
+                {t("map.dependency")} ({t("sidePanel.redColor")})
+              </span>
             </div>
             <div className="legend-item provision">
               <div className="color-indicator"></div>
-              <span>Provisão (verde)</span>
+              <span>
+                {t("map.provision")} ({t("sidePanel.greenColor")})
+              </span>
             </div>
             <div className="intensity-spectrum">
-              <div className="spectrum-label">Intensidade das Relações</div>
+              <div className="spectrum-label">{t("map.criticality")}</div>
               <div className="spectrum-bar"></div>
               <div className="spectrum-labels">
-                <span>Baixa (0%)</span>
-                <span>Alta (100%)</span>
+                <span>{t("filters.low")} (0%)</span>
+                <span>{t("filters.critical")} (100%)</span>
               </div>
             </div>
           </ColorLegend>
         </Section>
 
         <Section>
-          <h3>Classes de Conteúdo</h3>
+          <h3>{t("sidePanel.contentClassDistribution")}</h3>
           <ChartContainer>
             <div className="chart-wrapper">
               <div style={{ height: "200px" }}>
@@ -420,7 +429,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
         </Section>
 
         <Section>
-          <h3>Relações Detalhadas</h3>
+          <h3>{t("sidePanel.detailedRelations")}</h3>
           <RelationsList>
             {countryRelations.length === 0 ? (
               <p
@@ -430,66 +439,74 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                   fontStyle: "italic",
                 }}
               >
-                Nenhuma relação encontrada para este país
+                {t("sidePanel.noDependencies")}
               </p>
             ) : (
-              countryRelations.map((relation, index) => (
-                <RelationItem
-                  key={`${relation.fromCountry}-${relation.toCountry}-${index}`}
-                >
-                  <div className="relation-header">
-                    <strong>
-                      {
-                        countries.find((c) => c.id === relation.fromCountry)
-                          ?.name
-                      }{" "}
-                      →{" "}
-                      {countries.find((c) => c.id === relation.toCountry)?.name}
-                    </strong>
-                    <span className={`relation-type ${relation.type}`}>
-                      {relation.type === "dependency"
-                        ? "Dependência"
-                        : "Provisão"}
-                    </span>
-                  </div>
-                  <div className="relation-details">
-                    <div className="detail-row">
-                      <span>CDN:</span>
-                      <span>
-                        {cdns.find((cdn) => cdn.id === relation.cdnProvider)
-                          ?.name || relation.cdnProvider}
+              countryRelations.map((relation, index) => {
+                const isOutgoing = relation.fromCountry === selectedCountry;
+                const otherCountry = isOutgoing
+                  ? relation.toCountry
+                  : relation.fromCountry;
+                const otherCountryName = t(`countries.${otherCountry}`);
+                const currentCountryName = t(`countries.${selectedCountry}`);
+
+                return (
+                  <RelationItem
+                    key={`${relation.fromCountry}-${relation.toCountry}-${index}`}
+                  >
+                    <div className="relation-header">
+                      <strong>
+                        {isOutgoing
+                          ? `${currentCountryName} → ${otherCountryName}`
+                          : `${otherCountryName} → ${currentCountryName}`}
+                      </strong>
+                      <span className={`relation-type ${relation.type}`}>
+                        {isOutgoing
+                          ? relation.type === "dependency"
+                            ? t("sidePanel.dependsOnRelation")
+                            : t("sidePanel.providesToRelation")
+                          : relation.type === "dependency"
+                          ? t("sidePanel.receivesDependency")
+                          : t("sidePanel.receivesProvision")}
                       </span>
                     </div>
-                    <div className="detail-row">
-                      <span>Classe:</span>
-                      <span>
-                        {contentClasses.find(
-                          (cc) => cc.id === relation.contentClass
-                        )?.name || relation.contentClass}
-                      </span>
+                    <div className="relation-details">
+                      <div className="detail-row">
+                        <span>{t("sidePanel.cdnLabel")}</span>
+                        <span>
+                          {cdns.find((cdn) => cdn.id === relation.cdnProvider)
+                            ?.name || relation.cdnProvider}
+                        </span>
+                      </div>
+                      <div className="detail-row">
+                        <span>{t("sidePanel.classLabel")}</span>
+                        <span>
+                          {t(`contentClassCategories.${relation.contentClass}`)}
+                        </span>
+                      </div>
+                      <div className="detail-row">
+                        <span>{t("sidePanel.criticalityLabel")}</span>
+                        <span
+                          style={{
+                            color:
+                              relation.intensity > 70
+                                ? "#bf616a"
+                                : relation.intensity > 40
+                                ? "#ebcb8b"
+                                : "#a3be8c",
+                          }}
+                        >
+                          {relation.intensity}%
+                        </span>
+                      </div>
+                      <div className="detail-row">
+                        <span>{t("sidePanel.protocolLabel")}</span>
+                        <span>{relation.protocol.type}</span>
+                      </div>
                     </div>
-                    <div className="detail-row">
-                      <span>Intensidade:</span>
-                      <span
-                        style={{
-                          color:
-                            relation.intensity > 70
-                              ? "#bf616a"
-                              : relation.intensity > 40
-                              ? "#ebcb8b"
-                              : "#a3be8c",
-                        }}
-                      >
-                        {relation.intensity}%
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span>Protocolo:</span>
-                      <span>{relation.protocol.type}</span>
-                    </div>
-                  </div>
-                </RelationItem>
-              ))
+                  </RelationItem>
+                );
+              })
             )}
           </RelationsList>
         </Section>

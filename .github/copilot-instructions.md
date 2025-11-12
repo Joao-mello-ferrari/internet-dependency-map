@@ -31,6 +31,7 @@ This is an interactive web application for visualizing dependency and provision 
 ## Data Structure
 
 The application handles data about:
+
 - Countries with geographic coordinates
 - CDN providers and their coverage
 - IPv4/IPv6 protocol metrics
