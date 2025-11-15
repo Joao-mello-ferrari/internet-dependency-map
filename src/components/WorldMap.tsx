@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
-import { LatLngBounds } from "leaflet";
-import styled from "styled-components";
-import { useTranslation } from "react-i18next";
-import { useTranslatedData } from "../hooks/useTranslatedData";
-import type { Country, DependencyRelation, FilterOptions } from "../types";
+import { LatLngBounds } from 'leaflet';
+import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet';
+import styled from 'styled-components';
+
+import { useTranslatedData } from '../hooks/useTranslatedData';
+import type { Country, DependencyRelation, FilterOptions } from '../types';
 
 interface WorldMapProps {
   countries: Country[];
@@ -177,19 +178,19 @@ const MapWrapper = styled.div`
 // GeoJSON simplificado para países (você pode usar dados mais detalhados)
 const getCountryGeoJSON = (countries: Country[]) => {
   return {
-    type: "FeatureCollection" as const,
-    features: countries.map((country) => ({
-      type: "Feature" as const,
+    type: 'FeatureCollection' as const,
+    features: countries.map(country => ({
+      type: 'Feature' as const,
       properties: {
         id: country.id,
         name: country.name,
-        code: country.code,
+        code: country.code
       },
       geometry: {
-        type: "Point" as const,
-        coordinates: country.coordinates,
-      },
-    })),
+        type: 'Point' as const,
+        coordinates: country.coordinates
+      }
+    }))
   };
 };
 
@@ -226,7 +227,7 @@ const getIntensityColor = (intensity: number): string => {
   // Converter para hex
   const toHex = (n: number) => {
     const hex = Math.round(n).toString(16);
-    return hex.length === 1 ? "0" + hex : hex;
+    return hex.length === 1 ? '0' + hex : hex;
   };
 
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
@@ -244,20 +245,20 @@ const RelationLines: React.FC<{
   useEffect(() => {
     // Limpar linhas anteriores
     map.eachLayer((layer: any) => {
-      if (layer.options && layer.options.className?.includes("relation-line")) {
+      if (layer.options && layer.options.className?.includes('relation-line')) {
         map.removeLayer(layer);
       }
     });
 
     // Se nenhum país selecionado, não desenhar linhas
     if (!selectedCountry) {
-      console.log("Nenhum país selecionado");
+      console.log('Nenhum país selecionado');
       return;
     }
 
     // Filter relations based on selected country (origin or host)
     const filteredRelations = relations.filter(
-      (r) =>
+      r =>
         r.originCountry === selectedCountry || r.hostCountry === selectedCountry
     );
 
@@ -266,17 +267,17 @@ const RelationLines: React.FC<{
     console.log(
       `🔍 Relações encontradas para ${selectedCountry}: ${filteredRelations.length}`
     );
-    console.log("📋 Detalhes das relações:", filteredRelations);
+    console.log('📋 Detalhes das relações:', filteredRelations);
 
     // Group relations by country pair (considering BOTH directions)
     // To avoid duplication, always use alphabetical order of IDs
     const relationsByPair: { [key: string]: DependencyRelation[] } = {};
 
-    filteredRelations.forEach((relation) => {
+    filteredRelations.forEach(relation => {
       // Create unique key based on alphabetical order of countries
       const [country1, country2] = [
         relation.originCountry,
-        relation.hostCountry,
+        relation.hostCountry
       ].sort();
       const pairKey = `${country1}-${country2}`;
 
@@ -287,7 +288,7 @@ const RelationLines: React.FC<{
     });
 
     console.log(
-      "📦 Relações agrupadas por par (ambas direções):",
+      '📦 Relações agrupadas por par (ambas direções):',
       relationsByPair
     );
 
@@ -312,7 +313,7 @@ const RelationLines: React.FC<{
 
       const controlPoint = [
         midLat + offset * Math.cos(angle),
-        midLng - offset * Math.sin(angle),
+        midLng - offset * Math.sin(angle)
       ];
 
       const arcPoints: [number, number][] = [];
@@ -338,9 +339,9 @@ const RelationLines: React.FC<{
 
     Object.entries(relationsByPair).forEach(([pairKey, relationsInPair]) => {
       // pairKey is in alphabetical order, so we need to determine the actual countries
-      const [id1, id2] = pairKey.split("-");
-      const country1 = countries.find((c) => c.id === id1);
-      const country2 = countries.find((c) => c.id === id2);
+      const [id1, id2] = pairKey.split('-');
+      const country1 = countries.find(c => c.id === id1);
+      const country2 = countries.find(c => c.id === id2);
 
       if (!country1 || !country2) return;
 
@@ -354,7 +355,9 @@ const RelationLines: React.FC<{
 
       const numRelations = sortedRelations.length;
 
-      console.log(`🔗 Par ${id1} ↔ ${id2}: ${numRelations} relação(ões) total`);
+      console.log(
+        `🔗 Par ${id1} ↔ ${id2}: ${numRelations} relação(ões) total`
+      );
       console.log(
         `   Detalhes (ordenado):`,
         sortedRelations.map(
@@ -367,21 +370,19 @@ const RelationLines: React.FC<{
       sortedRelations.forEach((relation, index) => {
         // Determine the direction of current relation (origin → host)
         const originCountry = countries.find(
-          (c) => c.id === relation.originCountry
+          c => c.id === relation.originCountry
         );
-        const hostCountry = countries.find(
-          (c) => c.id === relation.hostCountry
-        );
+        const hostCountry = countries.find(c => c.id === relation.hostCountry);
 
         if (!originCountry || !hostCountry) return;
 
         const coord1: [number, number] = [
           originCountry.coordinates[1],
-          originCountry.coordinates[0],
+          originCountry.coordinates[0]
         ];
         const coord2: [number, number] = [
           hostCountry.coordinates[1],
-          hostCountry.coordinates[0],
+          hostCountry.coordinates[0]
         ];
 
         // For 1 arc: offset = 0 (center line or slightly curved)
@@ -401,7 +402,7 @@ const RelationLines: React.FC<{
           className: `relation-line dependency-arc multi-relation`,
           weight: 3,
           opacity: 0.8,
-          color: getIntensityColor(relation.intensity),
+          color: getIntensityColor(relation.intensity)
         });
 
         arc.addTo(map);
@@ -427,15 +428,22 @@ const RelationLines: React.FC<{
            Intensity: ${relation.intensity}%<br/>`,
           {
             permanent: false,
-            direction: "center",
-            className: "relation-tooltip",
+            direction: 'center',
+            className: 'relation-tooltip'
           }
         );
       });
     });
 
     console.log(`🎉 Finalizado: ${totalArcsDrawn} arcos processados`);
-  }, [relations, countries, selectedCountry, map]);
+  }, [
+    relations,
+    countries,
+    selectedCountry,
+    map,
+    getContentClassName,
+    getCountryName
+  ]);
 
   return null;
 };
@@ -445,20 +453,20 @@ export const WorldMap: React.FC<WorldMapProps> = ({
   relations,
   filters,
   selectedCountry,
-  onCountryClick,
+  onCountryClick
 }) => {
   const { t, i18n } = useTranslation();
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
 
   // Filtrar relações baseadas nos filtros ativos
-  const filteredRelations = relations.filter((relation) => {
-    if (filters.relationType === "dependency") {
+  const filteredRelations = relations.filter(relation => {
+    if (filters.relationType === 'dependency') {
       // Show only relations where selected country is the origin (depends on others)
       if (relation.originCountry !== selectedCountry) {
         return false;
       }
     }
-    if (filters.relationType === "provision") {
+    if (filters.relationType === 'provision') {
       // Show only relations where selected country is the origin (depends on others)
       if (relation.hostCountry !== selectedCountry) {
         return false;
@@ -490,11 +498,11 @@ export const WorldMap: React.FC<WorldMapProps> = ({
     return true;
   });
 
-  console.log("🔧 FILTROS APLICADOS:", filters);
+  console.log('🔧 FILTROS APLICADOS:', filters);
   console.log(
-    "🔧 Relações após filtros:",
+    '🔧 Relações após filtros:',
     filteredRelations.length,
-    "de",
+    'de',
     relations.length
   );
 
@@ -502,13 +510,13 @@ export const WorldMap: React.FC<WorldMapProps> = ({
   // If a country is selected, filter additionally for that country
   const relationsForLines = selectedCountry
     ? filteredRelations.filter(
-        (r) =>
+        r =>
           r.originCountry === selectedCountry ||
           r.hostCountry === selectedCountry
       )
     : filteredRelations;
 
-  console.log("🎯 RELAÇÕES PARA LINHAS:", relationsForLines.length);
+  console.log('🎯 RELAÇÕES PARA LINHAS:', relationsForLines.length);
   if (selectedCountry) {
     console.log(
       `🎯 País selecionado: ${selectedCountry}, suas relações:`,
@@ -533,37 +541,37 @@ export const WorldMap: React.FC<WorldMapProps> = ({
   // };
 
   const getCountryStyle = (countryId: string) => {
-    if (countryId === selectedCountry) return "country-selected";
-    if (countryId === hoveredCountry) return "country-highlighted";
+    if (countryId === selectedCountry) return 'country-selected';
+    if (countryId === hoveredCountry) return 'country-highlighted';
 
     // Highlight countries that have active relations
     const hasActiveRelations = filteredRelations.some(
-      (r) => r.originCountry === countryId || r.hostCountry === countryId
+      r => r.originCountry === countryId || r.hostCountry === countryId
     );
 
-    return hasActiveRelations ? "country-highlighted" : "country-default";
+    return hasActiveRelations ? 'country-highlighted' : 'country-default';
   };
 
   const handleCountryFeature = (feature: any, layer: any) => {
     const countryId = feature.properties.id;
 
     layer.setStyle({
-      className: getCountryStyle(countryId),
+      className: getCountryStyle(countryId)
     });
 
     layer.on({
       click: () => {
-        console.log("🔥 CLIQUE NO PAÍS! ID:", countryId);
-        console.log("🔥 Nome do país:", feature.properties.name);
+        console.log('🔥 CLIQUE NO PAÍS! ID:', countryId);
+        console.log('🔥 Nome do país:', feature.properties.name);
 
-        const country = countries.find((c) => c.id === countryId);
+        const country = countries.find(c => c.id === countryId);
         if (country) {
-          console.log("🌍 País encontrado nos dados:", country.name);
+          console.log('🌍 País encontrado nos dados:', country.name);
         } else {
-          console.log("❌ País não encontrado nos dados com ID:", countryId);
+          console.log('❌ País não encontrado nos dados com ID:', countryId);
           console.log(
-            "🔍 IDs disponíveis:",
-            countries.map((c) => c.id)
+            '🔍 IDs disponíveis:',
+            countries.map(c => c.id)
           );
         }
 
@@ -571,17 +579,17 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       },
       mouseover: () => {
         setHoveredCountry(countryId);
-        layer.setStyle({ className: "country-highlighted" });
+        layer.setStyle({ className: 'country-highlighted' });
       },
       mouseout: () => {
         setHoveredCountry(null);
         layer.setStyle({ className: getCountryStyle(countryId) });
-      },
+      }
     });
 
     // Tooltip with country information
     const countryRelations = filteredRelations.filter(
-      (r) => r.originCountry === countryId || r.hostCountry === countryId
+      r => r.originCountry === countryId || r.hostCountry === countryId
     );
 
     const countryName = t(`countries.${countryId}`);
@@ -589,17 +597,17 @@ export const WorldMap: React.FC<WorldMapProps> = ({
 
     layer.bindTooltip(
       `<b>${countryName} (${countryCode})</b><br/>
-       ${t("map.activeRelations")}: ${countryRelations.length}<br/>
-       ${t("map.dependenciesOrigin")}: ${
-        countryRelations.filter((r) => r.originCountry === countryId).length
-      }<br/>
-       ${t("map.provisionsHost")}: ${
-        countryRelations.filter((r) => r.hostCountry === countryId).length
-      }`,
+       ${t('map.activeRelations')}: ${countryRelations.length}<br/>
+       ${t('map.dependenciesOrigin')}: ${
+         countryRelations.filter(r => r.originCountry === countryId).length
+       }<br/>
+       ${t('map.provisionsHost')}: ${
+         countryRelations.filter(r => r.hostCountry === countryId).length
+       }`,
       {
         permanent: false,
-        direction: "top",
-        className: "country-tooltip",
+        direction: 'top',
+        className: 'country-tooltip'
       }
     );
   };
@@ -609,7 +617,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       <MapContainer
         center={[20, 0]}
         zoom={2}
-        style={{ height: "100%", width: "100%" }}
+        style={{ height: '100%', width: '100%' }}
         worldCopyJump={true}
         maxBounds={new LatLngBounds([-90, -180], [90, 180])}
       >
@@ -625,11 +633,11 @@ export const WorldMap: React.FC<WorldMapProps> = ({
           pointToLayer={(_feature, latlng) => {
             return window.L.circleMarker(latlng, {
               radius: 8,
-              fillColor: "#81a1c1",
-              color: "#88c0d0",
+              fillColor: '#81a1c1',
+              color: '#88c0d0',
               weight: 2,
               opacity: 1,
-              fillOpacity: 0.8,
+              fillOpacity: 0.8
             });
           }}
         />

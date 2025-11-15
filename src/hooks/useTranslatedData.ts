@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
 /**
  * Custom hook to get translated names for countries and content classes
@@ -22,6 +22,6 @@ export const useTranslatedData = () => {
 
   return {
     getCountryName,
-    getContentClassName,
+    getContentClassName
   };
 };

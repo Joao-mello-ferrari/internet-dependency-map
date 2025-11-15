@@ -1,13 +1,14 @@
-import { useState } from "react";
-import styled, { createGlobalStyle } from "styled-components";
-import { useTranslation } from "react-i18next";
-import { WorldMap } from "./components/WorldMap";
-import { SidePanel } from "./components/SidePanel";
-import { FilterPanel } from "./components/FilterPanel";
-import LanguageSwitcher from "./components/LanguageSwitcher";
-import { mockData } from "./data/mockData";
-import type { FilterOptions, DependencyRelation } from "./types";
-import "leaflet/dist/leaflet.css";
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled, { createGlobalStyle } from 'styled-components';
+
+import { FilterPanel } from './components/FilterPanel';
+import LanguageSwitcher from './components/LanguageSwitcher';
+import { SidePanel } from './components/SidePanel';
+import { WorldMap } from './components/WorldMap';
+import { mockData } from './data/mockData';
+import type { FilterOptions, DependencyRelation } from './types';
+import 'leaflet/dist/leaflet.css';
 
 // Global styles para reset e tema escuro
 const GlobalStyle = createGlobalStyle`
@@ -143,7 +144,7 @@ const LoadingOverlay = styled.div<{ visible: boolean }>`
   right: 0;
   bottom: 0;
   background: rgba(30, 30, 46, 0.8);
-  display: ${(props) => (props.visible ? "flex" : "none")};
+  display: ${props => (props.visible ? 'flex' : 'none')};
   align-items: center;
   justify-content: center;
   z-index: 2000;
@@ -206,33 +207,33 @@ function App() {
     protocols: [],
     contentClasses: [],
     intensityRange: [0, 100],
-    relationType: "all",
+    relationType: 'all'
   });
 
   // Debug: Verificar dados carregados
-  console.log("📊 APP.TSX - Dados carregados:");
+  console.log('📊 APP.TSX - Dados carregados:');
   console.log(
-    "📊 Países disponíveis:",
-    mockData.countries.map((c) => `${c.id} (${c.name})`)
+    '📊 Países disponíveis:',
+    mockData.countries.map(c => `${c.id} (${c.name})`)
   );
-  console.log("📊 Total de relações:", mockData.relations.length);
+  console.log('📊 Total de relações:', mockData.relations.length);
   console.log(
-    "📊 Amostra de relações Brasil:",
+    '📊 Amostra de relações Brasil:',
     mockData.relations.filter(
-      (r) => r.originCountry === "BR" || r.hostCountry === "BR"
+      r => r.originCountry === 'BR' || r.hostCountry === 'BR'
     )
   );
-  console.log("📊 Estado atual selectedCountry:", selectedCountry);
+  console.log('📊 Estado atual selectedCountry:', selectedCountry);
 
   const handleCountryClick = (countryCode: string) => {
-    console.log("🚀 APP.TSX - handleCountryClick chamado com:", countryCode);
-    console.log("🚀 Estado atual selectedCountry:", selectedCountry);
+    console.log('🚀 APP.TSX - handleCountryClick chamado com:', countryCode);
+    console.log('🚀 Estado atual selectedCountry:', selectedCountry);
 
     setIsLoading(true);
     // Simular carregamento de dados
     setTimeout(() => {
       const newSelection = countryCode === selectedCountry ? null : countryCode;
-      console.log("🚀 Novo estado selectedCountry:", newSelection);
+      console.log('🚀 Novo estado selectedCountry:', newSelection);
       setSelectedCountry(newSelection);
       setIsLoading(false);
     }, 500);
@@ -252,7 +253,7 @@ function App() {
   };
 
   // Filtrar relações baseado nos filtros ativos
-  const filteredRelations = mockData.relations.filter((relation) => {
+  const filteredRelations = mockData.relations.filter(relation => {
     // Removido filtro de países - agora países são selecionados diretamente no mapa
     if (filters.cdns.length && !filters.cdns.includes(relation.cdnProvider)) {
       return false;
@@ -276,13 +277,13 @@ function App() {
       return false;
     }
     // Relation type filter based on selected country's role
-    if (selectedCountry && filters.relationType !== "all") {
-      if (filters.relationType === "dependency") {
+    if (selectedCountry && filters.relationType !== 'all') {
+      if (filters.relationType === 'dependency') {
         // Show only relations where selected country is the origin (depends on others)
         if (relation.originCountry !== selectedCountry) {
           return false;
         }
-      } else if (filters.relationType === "provision") {
+      } else if (filters.relationType === 'provision') {
         // Show only relations where selected country is the host (provides to others)
         if (relation.hostCountry !== selectedCountry) {
           return false;
@@ -298,7 +299,7 @@ function App() {
     filters.contentClasses.length > 0 ||
     filters.intensityRange[0] > 0 ||
     filters.intensityRange[1] < 100 ||
-    filters.relationType !== "all";
+    filters.relationType !== 'all';
 
   const shouldShowEmptyState =
     hasActiveFilters && filteredRelations.length === 0;
@@ -309,13 +310,13 @@ function App() {
       <AppContainer>
         <Header>
           <div className="header-content">
-            <h1>{t("app.title")}</h1>
-            <p className="subtitle">{t("app.subtitle")}</p>
+            <h1>{t('app.title')}</h1>
+            <p className="subtitle">{t('app.subtitle')}</p>
           </div>
           <div className="project-info">
             <LanguageSwitcher />
             {/* <div>{t("app.projectInfo.internship")}</div> */}
-            <div>{t("app.projectInfo.researchSystem")}</div>
+            <div>{t('app.projectInfo.researchSystem')}</div>
           </div>
         </Header>
 
@@ -331,12 +332,12 @@ function App() {
 
           <LoadingOverlay visible={isLoading}>
             <span className="loading-spinner">⟳</span>
-            {t("common.loading")}
+            {t('common.loading')}
           </LoadingOverlay>
 
           {shouldShowEmptyState && (
             <EmptyState>
-              <h3>{t("common.noData")}</h3>
+              <h3>{t('common.noData')}</h3>
               <p>Os filtros aplicados não retornaram nenhum resultado.</p>
               <p className="suggestion">
                 Tente ajustar os filtros ou limpar algumas seleções para ver

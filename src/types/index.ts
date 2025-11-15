@@ -12,11 +12,11 @@ export interface CDN {
   id: string;
   name: string;
   provider: string;
-  type: "global" | "regional" | "local";
+  type: 'global' | 'regional' | 'local';
 }
 
 export interface Protocol {
-  type: "IPv4";
+  type: 'IPv4';
   version: string;
 }
 
@@ -24,14 +24,14 @@ export interface ContentClass {
   id: string;
   name: string;
   category:
-    | "finance"
-    | "health"
-    | "entertainment"
-    | "education"
-    | "government"
-    | "commerce"
-    | "media"
-    | "social";
+    | 'finance'
+    | 'health'
+    | 'entertainment'
+    | 'education'
+    | 'government'
+    | 'commerce'
+    | 'media'
+    | 'social';
   description: string;
 }
 
@@ -53,7 +53,7 @@ export interface FilterOptions {
   protocols: string[];
   contentClasses: string[];
   intensityRange: [number, number];
-  relationType: "all" | "dependency" | "provision";
+  relationType: 'all' | 'dependency' | 'provision';
 }
 
 export interface MapData {

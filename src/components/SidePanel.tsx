@@ -1,6 +1,3 @@
-import React from "react";
-import styled from "styled-components";
-import { useTranslation } from "react-i18next";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -8,11 +5,15 @@ import {
   Legend,
   CategoryScale,
   LinearScale,
-  BarElement,
-} from "chart.js";
-import { Bar } from "react-chartjs-2";
-import { useTranslatedData } from "../hooks/useTranslatedData";
-import type { Country, DependencyRelation, CDN, ContentClass } from "../types";
+  BarElement
+} from 'chart.js';
+import React from 'react';
+import { Bar } from 'react-chartjs-2';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+
+import { useTranslatedData } from '../hooks/useTranslatedData';
+import type { Country, DependencyRelation, CDN, ContentClass } from '../types';
 
 ChartJS.register(
   ArcElement,
@@ -35,7 +36,7 @@ interface SidePanelProps {
 const PanelWrapper = styled.div<{ isOpen: boolean }>`
   position: fixed;
   top: 80px;
-  right: ${(props) => (props.isOpen ? "0" : "-400px")};
+  right: ${props => (props.isOpen ? '0' : '-400px')};
   width: 400px;
   height: calc(100vh - 80px);
   background: #2e3440;
@@ -158,11 +159,13 @@ const StatCard = styled.div`
     border: 1px solid #4c566a;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     z-index: 1003;
-    transition: opacity 0.2s, visibility 0.2s;
+    transition:
+      opacity 0.2s,
+      visibility 0.2s;
     text-align: left;
 
     &::after {
-      content: "";
+      content: '';
       position: absolute;
       top: 100%;
       right: 20px;
@@ -330,7 +333,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   relations,
   cdns,
   contentClasses,
-  onClose,
+  onClose
 }) => {
   const { t } = useTranslation();
   const { getContentClassName } = useTranslatedData();
@@ -338,7 +341,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   if (!selectedCountry) return null;
 
   const countryRelations = relations.filter(
-    (r) =>
+    r =>
       r.originCountry === selectedCountry || r.hostCountry === selectedCountry
   );
 
@@ -351,35 +354,38 @@ export const SidePanel: React.FC<SidePanelProps> = ({
       : 0;
 
   // Dados para gráfico de classes de conteúdo
-  const contentClassCounts = contentClasses.reduce((acc, contentClass) => {
-    const count = countryRelations.filter(
-      (r) => r.contentClass === contentClass.id
-    ).length;
-    const translatedName = getContentClassName(contentClass.id);
-    acc[translatedName] = count;
-    return acc;
-  }, {} as Record<string, number>);
+  const contentClassCounts = contentClasses.reduce(
+    (acc, contentClass) => {
+      const count = countryRelations.filter(
+        r => r.contentClass === contentClass.id
+      ).length;
+      const translatedName = getContentClassName(contentClass.id);
+      acc[translatedName] = count;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
   const contentClassData = {
     labels: Object.keys(contentClassCounts),
     datasets: [
       {
-        label: "Relações por Classe",
+        label: 'Relações por Classe',
         data: Object.values(contentClassCounts),
         backgroundColor: [
-          "#bf616a",
-          "#d08770",
-          "#ebcb8b",
-          "#a3be8c",
-          "#88c0d0",
-          "#81a1c1",
-          "#b48ead",
-          "#5e81ac",
+          '#bf616a',
+          '#d08770',
+          '#ebcb8b',
+          '#a3be8c',
+          '#88c0d0',
+          '#81a1c1',
+          '#b48ead',
+          '#5e81ac'
         ],
-        borderColor: "#4c566a",
-        borderWidth: 1,
-      },
-    ],
+        borderColor: '#4c566a',
+        borderWidth: 1
+      }
+    ]
   };
 
   const chartOptions = {
@@ -387,31 +393,31 @@ export const SidePanel: React.FC<SidePanelProps> = ({
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: false,
-      },
+        display: false
+      }
     },
     scales: {
       y: {
         beginAtZero: true,
         ticks: {
-          color: "#d8dee9",
-          font: { size: 10 },
+          color: '#d8dee9',
+          font: { size: 10 }
         },
         grid: {
-          color: "#4c566a",
-        },
+          color: '#4c566a'
+        }
       },
       x: {
         ticks: {
-          color: "#d8dee9",
+          color: '#d8dee9',
           font: { size: 10 },
-          maxRotation: 45,
+          maxRotation: 45
         },
         grid: {
-          color: "#4c566a",
-        },
-      },
-    },
+          color: '#4c566a'
+        }
+      }
+    }
   };
 
   return (
@@ -427,7 +433,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
 
       <PanelContent>
         <Section>
-          <h3>{t("sidePanel.overview")}</h3>
+          <h3>{t('sidePanel.overview')}</h3>
           <StatGrid>
             {/* <StatCard className="dependency">
               <div className="label">{t("sidePanel.dependencies")}</div>
@@ -439,46 +445,46 @@ export const SidePanel: React.FC<SidePanelProps> = ({
             </StatCard> */}
             <StatCard>
               <div className="label">
-                {t("sidePanel.totalVisibleRelations")}
+                {t('sidePanel.totalVisibleRelations')}
               </div>
               <div className="value">{countryRelations.length}</div>
             </StatCard>
             <StatCard className="intensity">
               <div className="label">
-                {t("sidePanel.criticalityLevel")}
+                {t('sidePanel.criticalityLevel')}
                 <span className="info-icon">i</span>
-                <div className="tooltip">{t("sidePanel.intensityTooltip")}</div>
+                <div className="tooltip">{t('sidePanel.intensityTooltip')}</div>
               </div>
               <div className="value">{avgIntensity}%</div>
             </StatCard>
           </StatGrid>
 
           <ColorLegend>
-            <h4>{t("sidePanel.colorLegend")}</h4>
+            <h4>{t('sidePanel.colorLegend')}</h4>
             <div className="legend-item dependency">
               <div className="color-indicator"></div>
-              <span>{t("sidePanel.moreIntense")}</span>
+              <span>{t('sidePanel.moreIntense')}</span>
             </div>
             <div className="legend-item provision">
               <div className="color-indicator"></div>
-              <span>{t("sidePanel.lessIntense")}</span>
+              <span>{t('sidePanel.lessIntense')}</span>
             </div>
             <div className="intensity-spectrum">
-              <div className="spectrum-label">{t("map.criticality")}</div>
+              <div className="spectrum-label">{t('map.criticality')}</div>
               <div className="spectrum-bar"></div>
               <div className="spectrum-labels">
-                <span>{t("filters.low")} (0%)</span>
-                <span>{t("filters.critical")} (100%)</span>
+                <span>{t('filters.low')} (0%)</span>
+                <span>{t('filters.critical')} (100%)</span>
               </div>
             </div>
           </ColorLegend>
         </Section>
 
         <Section>
-          <h3>{t("sidePanel.contentClassDistribution")}</h3>
+          <h3>{t('sidePanel.contentClassDistribution')}</h3>
           <ChartContainer>
             <div className="chart-wrapper">
-              <div style={{ height: "200px" }}>
+              <div style={{ height: '200px' }}>
                 <Bar data={contentClassData} options={chartOptions} />
               </div>
             </div>
@@ -486,17 +492,17 @@ export const SidePanel: React.FC<SidePanelProps> = ({
         </Section>
 
         <Section>
-          <h3>{t("sidePanel.detailedRelations")}</h3>
+          <h3>{t('sidePanel.detailedRelations')}</h3>
           <RelationsList>
             {countryRelations.length === 0 ? (
               <p
                 style={{
-                  color: "#d8dee9",
-                  textAlign: "center",
-                  fontStyle: "italic",
+                  color: '#d8dee9',
+                  textAlign: 'center',
+                  fontStyle: 'italic'
                 }}
               >
-                {t("sidePanel.noDependencies")}
+                {t('sidePanel.noDependencies')}
               </p>
             ) : (
               countryRelations.map((relation, index) => {
@@ -519,41 +525,41 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                       </strong>
                       <span className={`relation-type dependency`}>
                         {isOutgoing
-                          ? t("sidePanel.dependsOnRelation")
-                          : t("sidePanel.receivesDependency")}
+                          ? t('sidePanel.dependsOnRelation')
+                          : t('sidePanel.receivesDependency')}
                       </span>
                     </div>
                     <div className="relation-details">
                       <div className="detail-row">
-                        <span>{t("sidePanel.cdnLabel")}</span>
+                        <span>{t('sidePanel.cdnLabel')}</span>
                         <span>
-                          {cdns.find((cdn) => cdn.id === relation.cdnProvider)
+                          {cdns.find(cdn => cdn.id === relation.cdnProvider)
                             ?.name || relation.cdnProvider}
                         </span>
                       </div>
                       <div className="detail-row">
-                        <span>{t("sidePanel.classLabel")}</span>
+                        <span>{t('sidePanel.classLabel')}</span>
                         <span>
                           {t(`contentClassCategories.${relation.contentClass}`)}
                         </span>
                       </div>
                       <div className="detail-row">
-                        <span>{t("sidePanel.criticalityLabel")}</span>
+                        <span>{t('sidePanel.criticalityLabel')}</span>
                         <span
                           style={{
                             color:
                               relation.intensity > 70
-                                ? "#bf616a"
+                                ? '#bf616a'
                                 : relation.intensity > 40
-                                ? "#ebcb8b"
-                                : "#a3be8c",
+                                  ? '#ebcb8b'
+                                  : '#a3be8c'
                           }}
                         >
                           {relation.intensity}%
                         </span>
                       </div>
                       <div className="detail-row">
-                        <span>{t("sidePanel.protocolLabel")}</span>
+                        <span>{t('sidePanel.protocolLabel')}</span>
                         <span>{relation.protocol.type}</span>
                       </div>
                     </div>
