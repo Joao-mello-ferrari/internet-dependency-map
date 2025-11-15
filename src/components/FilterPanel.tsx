@@ -14,10 +14,10 @@ interface FilterPanelProps {
 
 const FilterWrapper = styled.div<{ isOpen: boolean }>`
   position: fixed;
-  top: 0;
+  top: 80px;
   left: ${(props) => (props.isOpen ? "0" : "-350px")};
   width: 350px;
-  height: 100vh;
+  height: calc(100vh - 80px);
   background: #2e3440;
   border-right: 1px solid #4c566a;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
@@ -50,12 +50,15 @@ const FilterToggle = styled.button<{ isOpen: boolean }>`
 `;
 
 const FilterHeader = styled.div`
-  padding: 20px;
+  padding: 6px 16px 16px;
   border-bottom: 1px solid #4c566a;
   background: #3b4252;
   position: sticky;
   top: 0;
   z-index: 1002;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
 
   h2 {
     margin: 0;
@@ -130,43 +133,43 @@ const SelectOption = styled.label`
   }
 `;
 
-const RangeSlider = styled.div`
-  .range-container {
-    margin: 10px 0;
-  }
+// const RangeSlider = styled.div`
+//   .range-container {
+//     margin: 10px 0;
+//   }
 
-  .range-labels {
-    display: flex;
-    justify-content: space-between;
-    color: #d8dee9;
-    font-size: 12px;
-    margin-bottom: 5px;
-  }
+//   .range-labels {
+//     display: flex;
+//     justify-content: space-between;
+//     color: #d8dee9;
+//     font-size: 12px;
+//     margin-bottom: 5px;
+//   }
 
-  .range-input {
-    width: 100%;
-    height: 6px;
-    border-radius: 3px;
-    background: #4c566a;
-    outline: none;
-    opacity: 0.7;
-    transition: opacity 0.2s;
-    accent-color: #5e81ac;
+//   .range-input {
+//     width: 100%;
+//     height: 6px;
+//     border-radius: 3px;
+//     background: #4c566a;
+//     outline: none;
+//     opacity: 0.7;
+//     transition: opacity 0.2s;
+//     accent-color: #5e81ac;
 
-    &:hover {
-      opacity: 1;
-    }
-  }
+//     &:hover {
+//       opacity: 1;
+//     }
+//   }
 
-  .range-values {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 5px;
-    color: #a3be8c;
-    font-size: 12px;
-    font-weight: bold;
-  }
-`;
+//   .range-values {
+//     display: flex;
+//     justify-content: space-between;
+//     margin-top: 5px;
+//     color: #a3be8c;
+//     font-size: 12px;
+//     font-weight: bold;
+//   }
+// `;
 
 const RadioGroup = styled.div`
   display: flex;
@@ -238,7 +241,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
     const updatedCDNs = checked
       ? [...filters.cdns, cdnId]
       : filters.cdns.filter((id) => id !== cdnId);
-
     onFiltersChange({ ...filters, cdns: updatedCDNs });
   };
 
@@ -250,11 +252,11 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
     onFiltersChange({ ...filters, contentClasses: updatedClasses });
   };
 
-  const handleIntensityRangeChange = (index: number, value: number) => {
-    const newRange: [number, number] = [...filters.intensityRange];
-    newRange[index] = value;
-    onFiltersChange({ ...filters, intensityRange: newRange });
-  };
+  // const handleIntensityRangeChange = (index: number, value: number) => {
+  //   const newRange: [number, number] = [...filters.intensityRange];
+  //   newRange[index] = value;
+  //   onFiltersChange({ ...filters, intensityRange: newRange });
+  // };
 
   const handleRelationTypeChange = (
     type: "all" | "dependency" | "provision"
@@ -281,7 +283,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   return (
     <>
       <FilterToggle isOpen={isOpen} onClick={onToggle}>
-        {isOpen ? `◀ ${t("common.none")}` : `▶ ${t("filters.toggle")}`}
+        {isOpen ? `◀ ${t("filters.toggleOff")}` : `▶ ${t("filters.toggle")}`}
       </FilterToggle>
 
       <FilterWrapper isOpen={isOpen}>
@@ -309,7 +311,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                     onChange={(e) => handleCDNChange(cdn.id, e.target.checked)}
                   />
                   {cdn.name}
-                  <span className="option-count">{cdn.type}</span>
+                  {/* <span className="option-count">{cdn.type}</span> */}
                 </SelectOption>
               ))}
             </MultiSelect>
@@ -333,14 +335,14 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                       )
                     }
                   />
-                  {t(`contentClassCategories.${contentClass.category}`)}
-                  <span className="option-count">{contentClass.category}</span>
+                  {t(`contentClassCategories.${contentClass.id}`)}
+                  {/* <span className="option-count">{contentClass.category}</span> */}
                 </SelectOption>
               ))}
             </MultiSelect>
           </FilterSection>
 
-          <FilterSection>
+          {/* <FilterSection>
             <h3>{t("filters.intensityRange")}</h3>
             <RangeSlider>
               <div className="range-container">
@@ -374,7 +376,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                 </div>
               </div>
             </RangeSlider>
-          </FilterSection>
+          </FilterSection> */}
 
           <FilterSection>
             <h3>{t("filters.relationshipTypes")}</h3>
@@ -398,7 +400,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                   onChange={() => handleRelationTypeChange("dependency")}
                 />
                 {t("filters.dependencies")}
-                <span className="radio-count">Vermelho</span>
+                <span className="radio-count">{t("filters.asOrigin")}</span>
               </RadioOption>
               <RadioOption>
                 <input
@@ -409,13 +411,13 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                   onChange={() => handleRelationTypeChange("provision")}
                 />
                 {t("filters.provisions")}
-                <span className="radio-count">Verde</span>
+                <span className="radio-count">{t("filters.asHost")}</span>
               </RadioOption>
             </RadioGroup>
           </FilterSection>
 
           <FilterSummary>
-            <div className="summary-title">Resumo dos Filtros</div>
+            <div className="summary-title">{t("filters.summaryTitle")}</div>
             {/* Removido resumo de países - países são selecionados diretamente no mapa */}
             <div className="summary-item">
               <span>{t("filters.cdns")}:</span>
@@ -429,14 +431,14 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                 {activeFiltersCount.contentClasses || t("common.all")}
               </span>
             </div>
-            <div className="summary-item">
+            {/* <div className="summary-item">
               <span>Intensidade:</span>
               <span className="summary-value">
                 {filters.intensityRange[0]}% - {filters.intensityRange[1]}%
               </span>
-            </div>
+            </div> */}
             <div className="summary-item">
-              <span>Tipo:</span>
+              <span>{t("filters.typeLabel")}:</span>
               <span className="summary-value">
                 {filters.relationType === "all"
                   ? t("common.all")

@@ -4,7 +4,7 @@
     "subtitle": "Plataforma de Análise e Visualização de Redes",
     "projectInfo": {
       "internship": "Estágio Obrigatório - FURG",
-      "researchSystem": "Sistema de Pesquisa em Redes"
+      "researchSystem": "Grupo de Pesquisa System - C3 FURG"
     }
   },
   "header": {
@@ -12,7 +12,8 @@
   },
   "filters": {
     "title": "Filtros",
-    "toggle": "Filtros",
+    "toggle": "Abrir Filtros",
+    "toggleOff": "Fechar Filtros",
     "reset": "Resetar Filtros",
     "countries": "Países",
     "selectCountries": "Selecione Países...",
@@ -33,11 +34,20 @@
     "low": "Baixo",
     "intensityRange": "Intensidade da Relação",
     "minimum": "Mínima",
-    "maximum": "Máxima"
+    "maximum": "Máxima",
+    "summaryTitle": "Resumo dos Filtros",
+    "typeLabel": "Tipo da Relação",
+    "redLabel": "Vermelho",
+    "greenLabel": "Verde",
+    "asOrigin": "Como Origem",
+    "asHost": "Como Hospedeiro"
   },
   "sidePanel": {
     "close": "Fechar",
     "overview": "Visão Geral",
+    "totalVisibleRelations": "Total de Relações Visíveis",
+    "moreIntense": "Mais Intenso",
+    "lessIntense": "Menos Intenso",
     "population": "População",
     "gdpPerCapita": "PIB Per Capita",
     "internetPenetration": "Penetração de Internet",
@@ -47,6 +57,7 @@
     "dependencies": "Dependências",
     "dependsOn": "Depende De",
     "criticalityLevel": "Nível de Criticidade",
+    "intensityTooltip": "Medida composta que combina a criticidade da classe de conteúdo (Serviços Críticos > Notícias > Serviços Digitais Gerais > Entretenimento) com a proporção de sites do país de origem que dependem do país hospedeiro.",
     "critical": "Crítico",
     "high": "Alto",
     "medium": "Médio",
@@ -77,17 +88,21 @@
   "map": {
     "country": "País",
     "dependency": "Dependência",
-    "provision": "Provisionamento",
+    "provision": "Provisão",
     "bidirectional": "Bidirecional",
     "from": "De",
     "to": "Para",
     "criticality": "Criticidade",
     "legend": "Legenda",
+    "intensityGradient": "Intensidade (Baixa → Alta)",
     "dependencyLines": "Linhas de Dependência",
     "provisionLines": "Linhas de Provisão",
     "selectedCountry": "País Selecionado",
     "relatedCountry": "País com Relações",
     "defaultCountry": "País Padrão",
+    "activeRelations": "Relações Ativas",
+    "dependenciesOrigin": "Dependências (como origem)",
+    "provisionsHost": "Provisões (como hospedeiro)",
     "stats": {
       "title": "Estatísticas em Tempo Real",
       "totalRelations": "Total de Relações:",
@@ -106,14 +121,10 @@
     "search": "Buscar"
   },
   "contentClassCategories": {
-    "finance": "Serviços Financeiros",
-    "health": "Saúde e Telemedicina",
-    "entertainment": "Entretenimento",
-    "education": "Educação",
-    "government": "Governo Digital",
-    "commerce": "Comércio Eletrônico",
-    "media": "Mídia e Notícias",
-    "social": "Redes Sociais"
+    "News": "Notícias",
+    "Critical Services": "Serviços Críticos",
+    "General Digital Services": "Serviços Digitais Gerais",
+    "Entertainment": "Entretenimento"
   },
   "language": {
     "en": "Inglês",
@@ -121,25 +132,28 @@
     "switchLanguage": "Alterar Idioma"
   },
   "countries": {
-    "BR": "Brasil",
-    "US": "Estados Unidos",
-    "GB": "Reino Unido",
-    "DE": "Alemanha",
-    "FR": "França",
-    "JP": "Japão",
-    "CN": "China",
-    "AU": "Austrália",
-    "CA": "Canadá",
-    "IN": "Índia",
-    "RU": "Rússia",
-    "ZA": "África do Sul",
     "AR": "Argentina",
-    "MX": "México",
-    "IT": "Itália",
+    "AU": "Austrália",
+    "BR": "Brasil",
+    "CA": "Canadá",
+    "JP": "Japão",
+    "CO": "Colômbia",
+    "CR": "Costa Rica",
+    "DE": "Alemanha",
+    "DO": "República Dominicana",
+    "EG": "Egito",
     "ES": "Espanha",
-    "KR": "Coreia do Sul",
-    "SG": "Singapura",
-    "NL": "Holanda",
-    "SE": "Suécia"
+    "FR": "França",
+    "GB": "Reino Unido",
+    "GT": "Guatemala",
+    "ID": "Indonésia",
+    "IN": "Índia",
+    "MX": "México",
+    "NG": "Nigéria",
+    "NZ": "Nova Zelândia",
+    "PG": "Papua Nova Guiné",
+    "IT": "Itália",
+    "US": "Estados Unidos",
+    "ZA": "África do Sul"
   }
 }

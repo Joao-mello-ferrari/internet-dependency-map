@@ -88,6 +88,7 @@ const AppContainer = styled.div`
 `;
 
 const Header = styled.header`
+  height: 80px;
   background: #2e3440;
   border-bottom: 1px solid #4c566a;
   padding: 15px 20px;
@@ -117,7 +118,10 @@ const Header = styled.header`
   }
 
   .project-info {
-    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
     font-size: 12px;
     color: #81a1c1;
     margin-left: 20px;
@@ -215,7 +219,7 @@ function App() {
   console.log(
     "📊 Amostra de relações Brasil:",
     mockData.relations.filter(
-      (r) => r.fromCountry === "BR" || r.toCountry === "BR"
+      (r) => r.originCountry === "BR" || r.hostCountry === "BR"
     )
   );
   console.log("📊 Estado atual selectedCountry:", selectedCountry);
@@ -271,11 +275,19 @@ function App() {
     ) {
       return false;
     }
-    if (
-      filters.relationType !== "all" &&
-      relation.type !== filters.relationType
-    ) {
-      return false;
+    // Relation type filter based on selected country's role
+    if (selectedCountry && filters.relationType !== "all") {
+      if (filters.relationType === "dependency") {
+        // Show only relations where selected country is the origin (depends on others)
+        if (relation.originCountry !== selectedCountry) {
+          return false;
+        }
+      } else if (filters.relationType === "provision") {
+        // Show only relations where selected country is the host (provides to others)
+        if (relation.hostCountry !== selectedCountry) {
+          return false;
+        }
+      }
     }
     return true;
   });
@@ -300,9 +312,9 @@ function App() {
             <h1>{t("app.title")}</h1>
             <p className="subtitle">{t("app.subtitle")}</p>
           </div>
-          <LanguageSwitcher />
           <div className="project-info">
-            <div>{t("app.projectInfo.internship")}</div>
+            <LanguageSwitcher />
+            {/* <div>{t("app.projectInfo.internship")}</div> */}
             <div>{t("app.projectInfo.researchSystem")}</div>
           </div>
         </Header>

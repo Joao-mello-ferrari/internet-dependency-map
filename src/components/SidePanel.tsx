@@ -11,6 +11,7 @@ import {
   BarElement,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
+import { useTranslatedData } from "../hooks/useTranslatedData";
 import type { Country, DependencyRelation, CDN, ContentClass } from "../types";
 
 ChartJS.register(
@@ -33,10 +34,10 @@ interface SidePanelProps {
 
 const PanelWrapper = styled.div<{ isOpen: boolean }>`
   position: fixed;
-  top: 0;
+  top: 80px;
   right: ${(props) => (props.isOpen ? "0" : "-400px")};
   width: 400px;
-  height: 100vh;
+  height: calc(100vh - 80px);
   background: #2e3440;
   border-left: 1px solid #4c566a;
   box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
@@ -108,11 +109,72 @@ const StatCard = styled.div`
   border-radius: 6px;
   padding: 12px;
   text-align: center;
+  position: relative;
 
   .label {
     font-size: 12px;
     color: #81a1c1;
     margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .info-icon {
+    cursor: help;
+    color: #88c0d0;
+    font-size: 14px;
+    font-weight: bold;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid #88c0d0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+
+    &:hover {
+      background: #88c0d0;
+      color: #2e3440;
+    }
+  }
+
+  .tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: 100%;
+    right: 10px;
+    background: #3b4252;
+    color: #eceff4;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    line-height: 1.5;
+    width: 280px;
+    margin-bottom: 8px;
+    border: 1px solid #4c566a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    z-index: 1003;
+    transition: opacity 0.2s, visibility 0.2s;
+    text-align: left;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      right: 20px;
+      border: 6px solid transparent;
+      border-top-color: #4c566a;
+    }
+  }
+
+  .info-icon:hover + .tooltip,
+  .tooltip:hover {
+    visibility: visible;
+    opacity: 1;
   }
 
   .value {
@@ -271,21 +333,13 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   onClose,
 }) => {
   const { t } = useTranslation();
+  const { getContentClassName } = useTranslatedData();
 
   if (!selectedCountry) return null;
 
   const countryRelations = relations.filter(
-    (r) => r.fromCountry === selectedCountry || r.toCountry === selectedCountry
-  );
-
-  // Separar relações onde o país é dependente (precisa de algo)
-  const dependencies = countryRelations.filter(
-    (r) => r.fromCountry === selectedCountry && r.type === "dependency"
-  );
-
-  // Separar relações onde o país é provedor (oferece algo)
-  const provisions = countryRelations.filter(
-    (r) => r.fromCountry === selectedCountry && r.type === "provision"
+    (r) =>
+      r.originCountry === selectedCountry || r.hostCountry === selectedCountry
   );
 
   const avgIntensity =
@@ -301,7 +355,8 @@ export const SidePanel: React.FC<SidePanelProps> = ({
     const count = countryRelations.filter(
       (r) => r.contentClass === contentClass.id
     ).length;
-    acc[contentClass.name] = count;
+    const translatedName = getContentClassName(contentClass.id);
+    acc[translatedName] = count;
     return acc;
   }, {} as Record<string, number>);
 
@@ -374,20 +429,26 @@ export const SidePanel: React.FC<SidePanelProps> = ({
         <Section>
           <h3>{t("sidePanel.overview")}</h3>
           <StatGrid>
-            <StatCard className="dependency">
+            {/* <StatCard className="dependency">
               <div className="label">{t("sidePanel.dependencies")}</div>
               <div className="value">{dependencies.length}</div>
             </StatCard>
             <StatCard className="provision">
               <div className="label">{t("sidePanel.provisions")}</div>
               <div className="value">{provisions.length}</div>
-            </StatCard>
+            </StatCard> */}
             <StatCard>
-              <div className="label">Total</div>
+              <div className="label">
+                {t("sidePanel.totalVisibleRelations")}
+              </div>
               <div className="value">{countryRelations.length}</div>
             </StatCard>
             <StatCard className="intensity">
-              <div className="label">{t("sidePanel.criticalityLevel")}</div>
+              <div className="label">
+                {t("sidePanel.criticalityLevel")}
+                <span className="info-icon">i</span>
+                <div className="tooltip">{t("sidePanel.intensityTooltip")}</div>
+              </div>
               <div className="value">{avgIntensity}%</div>
             </StatCard>
           </StatGrid>
@@ -396,15 +457,11 @@ export const SidePanel: React.FC<SidePanelProps> = ({
             <h4>{t("sidePanel.colorLegend")}</h4>
             <div className="legend-item dependency">
               <div className="color-indicator"></div>
-              <span>
-                {t("map.dependency")} ({t("sidePanel.redColor")})
-              </span>
+              <span>{t("sidePanel.moreIntense")}</span>
             </div>
             <div className="legend-item provision">
               <div className="color-indicator"></div>
-              <span>
-                {t("map.provision")} ({t("sidePanel.greenColor")})
-              </span>
+              <span>{t("sidePanel.lessIntense")}</span>
             </div>
             <div className="intensity-spectrum">
               <div className="spectrum-label">{t("map.criticality")}</div>
@@ -443,16 +500,16 @@ export const SidePanel: React.FC<SidePanelProps> = ({
               </p>
             ) : (
               countryRelations.map((relation, index) => {
-                const isOutgoing = relation.fromCountry === selectedCountry;
+                const isOutgoing = relation.originCountry === selectedCountry;
                 const otherCountry = isOutgoing
-                  ? relation.toCountry
-                  : relation.fromCountry;
+                  ? relation.hostCountry
+                  : relation.originCountry;
                 const otherCountryName = t(`countries.${otherCountry}`);
                 const currentCountryName = t(`countries.${selectedCountry}`);
 
                 return (
                   <RelationItem
-                    key={`${relation.fromCountry}-${relation.toCountry}-${index}`}
+                    key={`${relation.originCountry}-${relation.hostCountry}-${index}`}
                   >
                     <div className="relation-header">
                       <strong>
@@ -460,14 +517,10 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                           ? `${currentCountryName} → ${otherCountryName}`
                           : `${otherCountryName} → ${currentCountryName}`}
                       </strong>
-                      <span className={`relation-type ${relation.type}`}>
+                      <span className={`relation-type dependency`}>
                         {isOutgoing
-                          ? relation.type === "dependency"
-                            ? t("sidePanel.dependsOnRelation")
-                            : t("sidePanel.providesToRelation")
-                          : relation.type === "dependency"
-                          ? t("sidePanel.receivesDependency")
-                          : t("sidePanel.receivesProvision")}
+                          ? t("sidePanel.dependsOnRelation")
+                          : t("sidePanel.receivesDependency")}
                       </span>
                     </div>
                     <div className="relation-details">

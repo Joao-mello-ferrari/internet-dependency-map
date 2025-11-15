@@ -4,7 +4,7 @@
     "subtitle": "Network Analysis and Visualization Platform",
     "projectInfo": {
       "internship": "Mandatory Internship - FURG",
-      "researchSystem": "Network Research System"
+      "researchSystem": "Grupo de Pesquisa System - C3 FURG"
     }
   },
   "header": {
@@ -12,7 +12,8 @@
   },
   "filters": {
     "title": "Filters",
-    "toggle": "Filters",
+    "toggle": "Open Filters",
+    "toggleOff": "Close Filters",
     "reset": "Reset Filters",
     "countries": "Countries",
     "selectCountries": "Select Countries...",
@@ -33,11 +34,20 @@
     "low": "Low",
     "intensityRange": "Relationship Intensity",
     "minimum": "Minimum",
-    "maximum": "Maximum"
+    "maximum": "Maximum",
+    "summaryTitle": "Filter Summary",
+    "typeLabel": "Relationship Type",
+    "redLabel": "Red",
+    "greenLabel": "Green",
+    "asOrigin": "As Origin",
+    "asHost": "As Host"
   },
   "sidePanel": {
     "close": "Close",
     "overview": "Overview",
+    "totalVisibleRelations": "Total Visible Relations",
+    "moreIntense": "More Intense",
+    "lessIntense": "Less Intense",
     "population": "Population",
     "gdpPerCapita": "GDP Per Capita",
     "internetPenetration": "Internet Penetration",
@@ -47,6 +57,7 @@
     "dependencies": "Dependencies",
     "dependsOn": "Depends On",
     "criticalityLevel": "Criticality Level",
+    "intensityTooltip": "Composite measure combining content class criticality (Critical Services > News > General Digital Services > Entertainment) with the proportion of websites from the origin country that depend on the host country.",
     "critical": "Critical",
     "high": "High",
     "medium": "Medium",
@@ -83,11 +94,15 @@
     "to": "To",
     "criticality": "Criticality",
     "legend": "Legend",
+    "intensityGradient": "Intensity (Low → High)",
     "dependencyLines": "Dependency Lines",
     "provisionLines": "Provision Lines",
     "selectedCountry": "Selected Country",
     "relatedCountry": "Country with Relations",
     "defaultCountry": "Default Country",
+    "activeRelations": "Active Relations",
+    "dependenciesOrigin": "Dependencies (as origin)",
+    "provisionsHost": "Provisions (as host)",
     "stats": {
       "title": "Real-Time Statistics",
       "totalRelations": "Total Relations:",
@@ -106,14 +121,10 @@
     "search": "Search"
   },
   "contentClassCategories": {
-    "finance": "Financial Services",
-    "health": "Health and Telemedicine",
-    "entertainment": "Entertainment",
-    "education": "Education",
-    "government": "Digital Government",
-    "commerce": "E-commerce",
-    "media": "Media and News",
-    "social": "Social Networks"
+    "News": "News",
+    "Critical Services": "Critical Services",
+    "General Digital Services": "General Digital Services",
+    "Entertainment": "Entertainment"
   },
   "language": {
     "en": "English",
@@ -121,25 +132,28 @@
     "switchLanguage": "Switch Language"
   },
   "countries": {
-    "BR": "Brazil",
-    "US": "United States",
-    "GB": "United Kingdom",
-    "DE": "Germany",
-    "FR": "France",
-    "JP": "Japan",
-    "CN": "China",
-    "AU": "Australia",
-    "CA": "Canada",
-    "IN": "India",
-    "RU": "Russia",
-    "ZA": "South Africa",
     "AR": "Argentina",
-    "MX": "Mexico",
-    "IT": "Italy",
+    "AU": "Australia",
+    "BR": "Brazil",
+    "CA": "Canada",
+    "JP": "Japan",
+    "CO": "Colombia",
+    "CR": "Costa Rica",
+    "DE": "Germany",
+    "DO": "Dominican Republic",
+    "EG": "Egypt",
     "ES": "Spain",
-    "KR": "South Korea",
-    "SG": "Singapore",
-    "NL": "Netherlands",
-    "SE": "Sweden"
+    "FR": "France",
+    "GB": "United Kingdom",
+    "GT": "Guatemala",
+    "ID": "Indonesia",
+    "IN": "India",
+    "MX": "Mexico",
+    "NG": "Nigeria",
+    "NZ": "New Zealand",
+    "PG": "Papua New Guinea",
+    "IT": "Italy",
+    "US": "United States",
+    "ZA": "South Africa"
   }
 }

@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import { LatLngBounds } from "leaflet";
 import styled from "styled-components";
 import { useTranslation } from "react-i18next";
+import { useTranslatedData } from "../hooks/useTranslatedData";
 import type { Country, DependencyRelation, FilterOptions } from "../types";
 
 interface WorldMapProps {
@@ -93,85 +94,85 @@ const MapWrapper = styled.div`
   }
 `;
 
-const Legend = styled.div`
-  position: absolute;
-  bottom: 100px;
-  left: 20px;
-  background: rgba(30, 30, 46, 0.9);
-  border: 1px solid #4c566a;
-  border-radius: 8px;
-  padding: 15px;
-  color: #eceff4;
-  font-size: 12px;
-  z-index: 1000;
-  min-width: 200px;
+// const Legend = styled.div`
+//   position: absolute;
+//   bottom: 100px;
+//   left: 20px;
+//   background: rgba(30, 30, 46, 0.9);
+//   border: 1px solid #4c566a;
+//   border-radius: 8px;
+//   padding: 15px;
+//   color: #eceff4;
+//   font-size: 12px;
+//   z-index: 1000;
+//   min-width: 200px;
 
-  h4 {
-    margin: 0 0 10px 0;
-    color: #88c0d0;
-    font-size: 14px;
-  }
+//   h4 {
+//     margin: 0 0 10px 0;
+//     color: #88c0d0;
+//     font-size: 14px;
+//   }
 
-  .legend-item {
-    display: flex;
-    align-items: center;
-    margin: 5px 0;
-    gap: 8px;
-  }
+//   .legend-item {
+//     display: flex;
+//     align-items: center;
+//     margin: 5px 0;
+//     gap: 8px;
+//   }
 
-  .legend-color {
-    width: 16px;
-    height: 3px;
-    border-radius: 2px;
-  }
+//   .legend-color {
+//     width: 16px;
+//     height: 3px;
+//     border-radius: 2px;
+//   }
 
-  .dependency {
-    background: #bf616a;
-  }
-  .provision {
-    background: #a3be8c;
-  }
-  .selected {
-    background: #bf616a;
-  }
-  .highlighted {
-    background: #81a1c1;
-  }
-  .default {
-    background: #3b4252;
-  }
-`;
+//   .dependency {
+//     background: #bf616a;
+//   }
+//   .provision {
+//     background: #a3be8c;
+//   }
+//   .selected {
+//     background: #bf616a;
+//   }
+//   .highlighted {
+//     background: #81a1c1;
+//   }
+//   .default {
+//     background: #3b4252;
+//   }
+// `;
 
-const Stats = styled.div`
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  background: rgba(30, 30, 46, 0.9);
-  border: 1px solid #4c566a;
-  border-radius: 8px;
-  padding: 15px;
-  color: #eceff4;
-  font-size: 12px;
-  z-index: 1000;
-  min-width: 250px;
+// const Stats = styled.div`
+//   position: absolute;
+//   top: 20px;
+//   left: 20px;
+//   background: rgba(30, 30, 46, 0.9);
+//   border: 1px solid #4c566a;
+//   border-radius: 8px;
+//   padding: 15px;
+//   color: #eceff4;
+//   font-size: 12px;
+//   z-index: 1000;
+//   min-width: 250px;
 
-  h4 {
-    margin: 0 0 10px 0;
-    color: #88c0d0;
-    font-size: 14px;
-  }
+//   h4 {
+//     margin: 0 0 10px 0;
+//     color: #88c0d0;
+//     font-size: 14px;
+//   }
 
-  .stat-item {
-    margin: 5px 0;
-    display: flex;
-    justify-content: space-between;
-  }
+//   .stat-item {
+//     margin: 5px 0;
+//     display: flex;
+//     justify-content: space-between;
+//   }
 
-  .stat-value {
-    color: #a3be8c;
-    font-weight: bold;
-  }
-`;
+//   .stat-value {
+//     color: #a3be8c;
+//     font-weight: bold;
+//   }
+// `;
 
 // GeoJSON simplificado para países (você pode usar dados mais detalhados)
 const getCountryGeoJSON = (countries: Country[]) => {
@@ -192,6 +193,45 @@ const getCountryGeoJSON = (countries: Country[]) => {
   };
 };
 
+// Função para calcular cor baseada na intensidade (0-100)
+// 0-33: verde → amarelo
+// 34-66: amarelo → laranja
+// 67-100: laranja → vermelho
+const getIntensityColor = (intensity: number): string => {
+  // Normalizar intensidade para 0-1
+  const normalized = Math.max(0, Math.min(100, intensity)) / 100;
+
+  let r: number, g: number, b: number;
+
+  if (normalized < 0.33) {
+    // Verde (#a3be8c) → Amarelo (#ebcb8b)
+    const t = normalized / 0.33;
+    r = Math.round(163 + (235 - 163) * t);
+    g = Math.round(190 + (203 - 190) * t);
+    b = Math.round(140 + (139 - 140) * t);
+  } else if (normalized < 0.67) {
+    // Amarelo (#ebcb8b) → Laranja (#d08770)
+    const t = (normalized - 0.33) / 0.34;
+    r = Math.round(235 + (208 - 235) * t);
+    g = Math.round(203 + (135 - 203) * t);
+    b = Math.round(139 + (112 - 139) * t);
+  } else {
+    // Laranja (#d08770) → Vermelho (#bf616a)
+    const t = (normalized - 0.67) / 0.33;
+    r = Math.round(208 + (191 - 208) * t);
+    g = Math.round(135 + (97 - 135) * t);
+    b = Math.round(112 + (106 - 112) * t);
+  }
+
+  // Converter para hex
+  const toHex = (n: number) => {
+    const hex = Math.round(n).toString(16);
+    return hex.length === 1 ? "0" + hex : hex;
+  };
+
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+};
+
 // Componente para desenhar linhas de relação
 const RelationLines: React.FC<{
   relations: DependencyRelation[];
@@ -199,45 +239,7 @@ const RelationLines: React.FC<{
   selectedCountry: string | null;
 }> = ({ relations, countries, selectedCountry }) => {
   const map = useMap();
-
-  // Função para detectar se duas relações são bidirecionais
-  const findBidirectionalRelations = (relations: DependencyRelation[]) => {
-    const bidirectionalPairs = new Set<string>();
-    const unidirectionalRelations: DependencyRelation[] = [];
-    const bidirectionalGroups: { [key: string]: DependencyRelation[] } = {};
-
-    relations.forEach((relation) => {
-      const pairKey1 = `${relation.fromCountry}-${relation.toCountry}`;
-      const pairKey2 = `${relation.toCountry}-${relation.fromCountry}`;
-
-      // Verificar se existe a relação reversa
-      const reverseRelation = relations.find(
-        (r) =>
-          r.fromCountry === relation.toCountry &&
-          r.toCountry === relation.fromCountry
-      );
-
-      if (
-        reverseRelation &&
-        !bidirectionalPairs.has(pairKey1) &&
-        !bidirectionalPairs.has(pairKey2)
-      ) {
-        // Marcar ambas as direções como processadas
-        bidirectionalPairs.add(pairKey1);
-        bidirectionalPairs.add(pairKey2);
-
-        // Agrupar as duas relações
-        const groupKey = [relation.fromCountry, relation.toCountry]
-          .sort()
-          .join("-");
-        bidirectionalGroups[groupKey] = [relation, reverseRelation];
-      } else if (!bidirectionalPairs.has(pairKey1)) {
-        unidirectionalRelations.push(relation);
-      }
-    });
-
-    return { bidirectionalGroups, unidirectionalRelations };
-  };
+  const { getCountryName, getContentClassName } = useTranslatedData();
 
   useEffect(() => {
     // Limpar linhas anteriores
@@ -253,10 +255,10 @@ const RelationLines: React.FC<{
       return;
     }
 
-    // Filtrar relações baseadas no país selecionado
+    // Filter relations based on selected country (origin or host)
     const filteredRelations = relations.filter(
       (r) =>
-        r.fromCountry === selectedCountry || r.toCountry === selectedCountry
+        r.originCountry === selectedCountry || r.hostCountry === selectedCountry
     );
 
     console.log(`🗺️ País selecionado: ${selectedCountry}`);
@@ -266,205 +268,174 @@ const RelationLines: React.FC<{
     );
     console.log("📋 Detalhes das relações:", filteredRelations);
 
-    // Separar relações bidirecionais das unidirecionais
-    const { bidirectionalGroups, unidirectionalRelations } =
-      findBidirectionalRelations(filteredRelations);
+    // Group relations by country pair (considering BOTH directions)
+    // To avoid duplication, always use alphabetical order of IDs
+    const relationsByPair: { [key: string]: DependencyRelation[] } = {};
+
+    filteredRelations.forEach((relation) => {
+      // Create unique key based on alphabetical order of countries
+      const [country1, country2] = [
+        relation.originCountry,
+        relation.hostCountry,
+      ].sort();
+      const pairKey = `${country1}-${country2}`;
+
+      if (!relationsByPair[pairKey]) {
+        relationsByPair[pairKey] = [];
+      }
+      relationsByPair[pairKey].push(relation);
+    });
 
     console.log(
-      "🔄 Relações bidirecionais:",
-      Object.keys(bidirectionalGroups).length
+      "📦 Relações agrupadas por par (ambas direções):",
+      relationsByPair
     );
-    console.log("➡️ Relações unidirecionais:", unidirectionalRelations.length);
 
-    // Desenhar relações unidirecionais como linhas retas
-    unidirectionalRelations.forEach((relation, index) => {
-      const fromCountry = countries.find((c) => c.id === relation.fromCountry);
-      const toCountry = countries.find((c) => c.id === relation.toCountry);
+    // Função auxiliar para criar arcos com diferentes offsets
+    const createArc = (
+      coord1: [number, number],
+      coord2: [number, number],
+      offsetMultiplier: number
+    ): [number, number][] => {
+      const midLat = (coord1[0] + coord2[0]) / 2;
+      const midLng = (coord1[1] + coord2[1]) / 2;
 
-      console.log(
-        `➡️ Relação unidirecional ${index + 1}: ${relation.fromCountry} → ${
-          relation.toCountry
-        }`
+      const distance = Math.sqrt(
+        Math.pow(coord2[0] - coord1[0], 2) + Math.pow(coord2[1] - coord1[1], 2)
       );
 
-      if (fromCountry && toCountry) {
-        const line = window.L.polyline(
-          [
-            [fromCountry.coordinates[1], fromCountry.coordinates[0]],
-            [toCountry.coordinates[1], toCountry.coordinates[0]],
-          ],
-          {
-            className: `relation-line ${relation.type}-line unidirectional`,
-            weight: Math.max(3, relation.intensity / 15),
-            opacity: 0.8 + relation.intensity / 500,
-            color: relation.type === "dependency" ? "#bf616a" : "#a3be8c",
-          }
+      // Calcular offset base e ajustar baseado no multiplicador
+      const baseOffset = Math.min(distance * 0.2, 5);
+      const offset = baseOffset * offsetMultiplier;
+
+      const angle = Math.atan2(coord2[0] - coord1[0], coord2[1] - coord1[1]);
+
+      const controlPoint = [
+        midLat + offset * Math.cos(angle),
+        midLng - offset * Math.sin(angle),
+      ];
+
+      const arcPoints: [number, number][] = [];
+      for (let i = 0; i <= 20; i++) {
+        const t = i / 20;
+        const t2 = t * t;
+        const mt = 1 - t;
+        const mt2 = mt * mt;
+
+        const lat =
+          mt2 * coord1[0] + 2 * mt * t * controlPoint[0] + t2 * coord2[0];
+        const lng =
+          mt2 * coord1[1] + 2 * mt * t * controlPoint[1] + t2 * coord2[1];
+
+        arcPoints.push([lat, lng]);
+      }
+
+      return arcPoints;
+    };
+
+    // Desenhar todas as relações como arcos
+    let totalArcsDrawn = 0;
+
+    Object.entries(relationsByPair).forEach(([pairKey, relationsInPair]) => {
+      // pairKey is in alphabetical order, so we need to determine the actual countries
+      const [id1, id2] = pairKey.split("-");
+      const country1 = countries.find((c) => c.id === id1);
+      const country2 = countries.find((c) => c.id === id2);
+
+      if (!country1 || !country2) return;
+
+      // Sort relations by origin country and CDN provider
+      const sortedRelations = [...relationsInPair].sort((a, b) => {
+        if (a.originCountry !== b.originCountry) {
+          return a.originCountry.localeCompare(b.originCountry);
+        }
+        return a.cdnProvider.localeCompare(b.cdnProvider);
+      });
+
+      const numRelations = sortedRelations.length;
+
+      console.log(`🔗 Par ${id1} ↔ ${id2}: ${numRelations} relação(ões) total`);
+      console.log(
+        `   Detalhes (ordenado):`,
+        sortedRelations.map(
+          (r, i) =>
+            `[${i}] ${r.originCountry}→${r.hostCountry} (CDN: ${r.cdnProvider})`
+        )
+      );
+
+      // Calculate offsets to distribute ALL relations symmetrically
+      sortedRelations.forEach((relation, index) => {
+        // Determine the direction of current relation (origin → host)
+        const originCountry = countries.find(
+          (c) => c.id === relation.originCountry
+        );
+        const hostCountry = countries.find(
+          (c) => c.id === relation.hostCountry
         );
 
-        line.addTo(map);
+        if (!originCountry || !hostCountry) return;
+
+        const coord1: [number, number] = [
+          originCountry.coordinates[1],
+          originCountry.coordinates[0],
+        ];
+        const coord2: [number, number] = [
+          hostCountry.coordinates[1],
+          hostCountry.coordinates[0],
+        ];
+
+        // For 1 arc: offset = 0 (center line or slightly curved)
+        // For 2+ arcs: distribute all symmetrically
+        let offsetMultiplier: number;
+        if (numRelations === 1) {
+          offsetMultiplier = 0.3; // Slight curve to distinguish from straight line
+        } else {
+          const step = 1;
+          const startOffset = (-(numRelations - 1) * step) / 2;
+          offsetMultiplier = startOffset + index * step;
+        }
+
+        const arcPoints = createArc(coord1, coord2, offsetMultiplier);
+
+        const arc = window.L.polyline(arcPoints, {
+          className: `relation-line dependency-arc multi-relation`,
+          weight: 3,
+          opacity: 0.8,
+          color: getIntensityColor(relation.intensity),
+        });
+
+        arc.addTo(map);
+        totalArcsDrawn++;
+
         console.log(
-          `✅ Linha reta adicionada: ${fromCountry.name} → ${toCountry.name}`
+          `✅ Arco ${index + 1}/${numRelations} adicionado: ${
+            originCountry.name
+          } → ${hostCountry.name} (CDN: ${
+            relation.cdnProvider
+          }, offset: ${offsetMultiplier.toFixed(1)})`
         );
 
-        // Adicionar tooltip
-        line.bindTooltip(
-          `<strong>${fromCountry.name} → ${toCountry.name}</strong><br/>
+        // Add tooltip
+        const originCountryName = getCountryName(originCountry.code);
+        const hostCountryName = getCountryName(hostCountry.code);
+        const contentClassName = getContentClassName(relation.contentClass);
+
+        arc.bindTooltip(
+          `<strong>${originCountryName} ← ${hostCountryName}</strong><br/>
            CDN: ${relation.cdnProvider}<br/>
-           Classe: ${relation.contentClass}<br/>
-           Intensidade: ${relation.intensity}%<br/>
-           Protocolo: ${relation.protocol.type}`,
+           Class: ${contentClassName}<br/>
+           Intensity: ${relation.intensity}%<br/>`,
           {
             permanent: false,
             direction: "center",
             className: "relation-tooltip",
           }
         );
-      }
+      });
     });
 
-    // Desenhar relações bidirecionais como arcos
-    Object.entries(bidirectionalGroups).forEach(
-      ([, relationPair], groupIndex) => {
-        const [relation1, relation2] = relationPair;
-        const fromCountry = countries.find(
-          (c) => c.id === relation1.fromCountry
-        );
-        const toCountry = countries.find((c) => c.id === relation1.toCountry);
-
-        console.log(
-          `🔄 Relação bidirecional ${groupIndex + 1}: ${
-            relation1.fromCountry
-          } ↔ ${relation1.toCountry}`
-        );
-
-        if (fromCountry && toCountry) {
-          // Coordenadas dos países
-          const coord1 = [
-            fromCountry.coordinates[1],
-            fromCountry.coordinates[0],
-          ];
-          const coord2 = [toCountry.coordinates[1], toCountry.coordinates[0]];
-
-          // Calcular pontos intermediários para criar arcos curvos
-          const midLat = (coord1[0] + coord2[0]) / 2;
-          const midLng = (coord1[1] + coord2[1]) / 2;
-
-          // Calcular deslocamento perpendicular para criar curvatura
-          const distance = Math.sqrt(
-            Math.pow(coord2[0] - coord1[0], 2) +
-              Math.pow(coord2[1] - coord1[1], 2)
-          );
-          const offset = Math.min(distance * 0.2, 5); // Limitar offset máximo
-
-          // Calcular ângulo perpendicular
-          const angle = Math.atan2(
-            coord2[0] - coord1[0],
-            coord2[1] - coord1[1]
-          );
-
-          // Pontos de controle para os dois arcos
-          const controlPoint1 = [
-            midLat + offset * Math.cos(angle),
-            midLng - offset * Math.sin(angle),
-          ];
-
-          const controlPoint2 = [
-            midLat - offset * Math.cos(angle),
-            midLng + offset * Math.sin(angle),
-          ];
-
-          // Criar primeiro arco (usando polyline com pontos intermediários)
-          const arcPoints1: [number, number][] = [];
-          for (let i = 0; i <= 20; i++) {
-            const t = i / 20;
-            const t2 = t * t;
-            const mt = 1 - t;
-            const mt2 = mt * mt;
-
-            // Curva quadrática de Bézier
-            const lat =
-              mt2 * coord1[0] + 2 * mt * t * controlPoint1[0] + t2 * coord2[0];
-            const lng =
-              mt2 * coord1[1] + 2 * mt * t * controlPoint1[1] + t2 * coord2[1];
-
-            arcPoints1.push([lat, lng]);
-          }
-
-          // Criar segundo arco
-          const arcPoints2: [number, number][] = [];
-          for (let i = 0; i <= 20; i++) {
-            const t = i / 20;
-            const t2 = t * t;
-            const mt = 1 - t;
-            const mt2 = mt * mt;
-
-            // Curva quadrática de Bézier (direção inversa)
-            const lat =
-              mt2 * coord2[0] + 2 * mt * t * controlPoint2[0] + t2 * coord1[0];
-            const lng =
-              mt2 * coord2[1] + 2 * mt * t * controlPoint2[1] + t2 * coord1[1];
-
-            arcPoints2.push([lat, lng]);
-          }
-
-          // Desenhar primeiro arco
-          const arc1 = window.L.polyline(arcPoints1, {
-            className: `relation-line ${relation1.type}-arc bidirectional`,
-            weight: Math.max(3, relation1.intensity / 15),
-            opacity: 0.8 + relation1.intensity / 500,
-            color: relation1.type === "dependency" ? "#bf616a" : "#a3be8c",
-          });
-
-          // Desenhar segundo arco
-          const arc2 = window.L.polyline(arcPoints2, {
-            className: `relation-line ${relation2.type}-arc bidirectional`,
-            weight: Math.max(3, relation2.intensity / 15),
-            opacity: 0.8 + relation2.intensity / 500,
-            color: relation2.type === "dependency" ? "#bf616a" : "#a3be8c",
-          });
-
-          arc1.addTo(map);
-          arc2.addTo(map);
-
-          console.log(
-            `✅ Arcos bidirecionais adicionados: ${fromCountry.name} ↔ ${toCountry.name}`
-          );
-
-          // Adicionar tooltips para os arcos
-          arc1.bindTooltip(
-            `<strong>${fromCountry.name} → ${toCountry.name}</strong><br/>
-           CDN: ${relation1.cdnProvider}<br/>
-           Classe: ${relation1.contentClass}<br/>
-           Intensidade: ${relation1.intensity}%<br/>
-           Tipo: ${relation1.type}`,
-            {
-              permanent: false,
-              direction: "center",
-              className: "relation-tooltip",
-            }
-          );
-
-          arc2.bindTooltip(
-            `<strong>${toCountry.name} → ${fromCountry.name}</strong><br/>
-           CDN: ${relation2.cdnProvider}<br/>
-           Classe: ${relation2.contentClass}<br/>
-           Intensidade: ${relation2.intensity}%<br/>
-           Tipo: ${relation2.type}`,
-            {
-              permanent: false,
-              direction: "center",
-              className: "relation-tooltip",
-            }
-          );
-        }
-      }
-    );
-
-    const totalLines =
-      unidirectionalRelations.length +
-      Object.keys(bidirectionalGroups).length * 2;
-    console.log(`🎉 Finalizado: ${totalLines} linhas/arcos processados`);
-  }, [relations, countries, selectedCountry, map, findBidirectionalRelations]);
+    console.log(`🎉 Finalizado: ${totalArcsDrawn} arcos processados`);
+  }, [relations, countries, selectedCountry, map]);
 
   return null;
 };
@@ -476,11 +447,24 @@ export const WorldMap: React.FC<WorldMapProps> = ({
   selectedCountry,
   onCountryClick,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
 
   // Filtrar relações baseadas nos filtros ativos
   const filteredRelations = relations.filter((relation) => {
+    if (filters.relationType === "dependency") {
+      // Show only relations where selected country is the origin (depends on others)
+      if (relation.originCountry !== selectedCountry) {
+        return false;
+      }
+    }
+    if (filters.relationType === "provision") {
+      // Show only relations where selected country is the origin (depends on others)
+      if (relation.hostCountry !== selectedCountry) {
+        return false;
+      }
+    }
+
     // Removido filtro de países - países são selecionados diretamente no mapa
     if (filters.cdns.length && !filters.cdns.includes(relation.cdnProvider)) {
       return false;
@@ -503,12 +487,6 @@ export const WorldMap: React.FC<WorldMapProps> = ({
     ) {
       return false;
     }
-    if (
-      filters.relationType !== "all" &&
-      relation.type !== filters.relationType
-    ) {
-      return false;
-    }
     return true;
   });
 
@@ -520,12 +498,13 @@ export const WorldMap: React.FC<WorldMapProps> = ({
     relations.length
   );
 
-  // Para as linhas de relação, usar as relações filtradas normalmente
-  // Se um país estiver selecionado, filtrar adicionalmente para esse país
+  // For relation lines, use filtered relations normally
+  // If a country is selected, filter additionally for that country
   const relationsForLines = selectedCountry
     ? filteredRelations.filter(
         (r) =>
-          r.fromCountry === selectedCountry || r.toCountry === selectedCountry
+          r.originCountry === selectedCountry ||
+          r.hostCountry === selectedCountry
       )
     : filteredRelations;
 
@@ -537,29 +516,29 @@ export const WorldMap: React.FC<WorldMapProps> = ({
     );
   }
 
-  // Calcular estatísticas
-  const stats = {
-    totalRelations: filteredRelations.length,
-    averageIntensity:
-      filteredRelations.length > 0
-        ? Math.round(
-            filteredRelations.reduce((sum, r) => sum + r.intensity, 0) /
-              filteredRelations.length
-          )
-        : 0,
-    dependencyCount: filteredRelations.filter((r) => r.type === "dependency")
-      .length,
-    provisionCount: filteredRelations.filter((r) => r.type === "provision")
-      .length,
-  };
+  // Calculate statistics
+  // const stats = {
+  //   totalRelations: filteredRelations.length,
+  //   averageIntensity:
+  //     filteredRelations.length > 0
+  //       ? Math.round(
+  //           filteredRelations.reduce((sum, r) => sum + r.intensity, 0) /
+  //             filteredRelations.length
+  //         )
+  //       : 0,
+  //   dependencyCount: filteredRelations.filter((r) => r.type === "dependency")
+  //     .length,
+  //   provisionCount: filteredRelations.filter((r) => r.type === "provision")
+  //     .length,
+  // };
 
   const getCountryStyle = (countryId: string) => {
     if (countryId === selectedCountry) return "country-selected";
     if (countryId === hoveredCountry) return "country-highlighted";
 
-    // Destacar países que têm relações ativas
+    // Highlight countries that have active relations
     const hasActiveRelations = filteredRelations.some(
-      (r) => r.fromCountry === countryId || r.toCountry === countryId
+      (r) => r.originCountry === countryId || r.hostCountry === countryId
     );
 
     return hasActiveRelations ? "country-highlighted" : "country-default";
@@ -600,20 +579,23 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       },
     });
 
-    // Tooltip com informações do país
+    // Tooltip with country information
     const countryRelations = filteredRelations.filter(
-      (r) => r.fromCountry === countryId || r.toCountry === countryId
+      (r) => r.originCountry === countryId || r.hostCountry === countryId
     );
 
+    const countryName = t(`countries.${countryId}`);
+    const countryCode = feature.properties.code;
+
     layer.bindTooltip(
-      `<b>${feature.properties.name}</b><br/>
-       Relações ativas: ${countryRelations.length}<br/>
-       Dependências: ${
-         countryRelations.filter((r) => r.fromCountry === countryId).length
-       }<br/>
-       Provisões: ${
-         countryRelations.filter((r) => r.toCountry === countryId).length
-       }`,
+      `<b>${countryName} (${countryCode})</b><br/>
+       ${t("map.activeRelations")}: ${countryRelations.length}<br/>
+       ${t("map.dependenciesOrigin")}: ${
+        countryRelations.filter((r) => r.originCountry === countryId).length
+      }<br/>
+       ${t("map.provisionsHost")}: ${
+        countryRelations.filter((r) => r.hostCountry === countryId).length
+      }`,
       {
         permanent: false,
         direction: "top",
@@ -637,6 +619,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
         />
 
         <GeoJSON
+          key={i18n.language}
           data={getCountryGeoJSON(countries)}
           onEachFeature={handleCountryFeature}
           pointToLayer={(_feature, latlng) => {
@@ -658,7 +641,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
         />
       </MapContainer>
 
-      <Stats>
+      {/* <Stats>
         <h4>{t("map.stats.title")}</h4>
         <div className="stat-item">
           <span>{t("map.stats.totalRelations")}</span>
@@ -676,17 +659,20 @@ export const WorldMap: React.FC<WorldMapProps> = ({
           <span>{t("map.stats.provisions")}</span>
           <span className="stat-value">{stats.provisionCount}</span>
         </div>
-      </Stats>
+      </Stats> */}
 
-      <Legend>
+      {/* <Legend>
         <h4>{t("map.legend")}</h4>
         <div className="legend-item">
-          <div className="legend-color dependency"></div>
-          <span>{t("map.dependencyLines")}</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-color provision"></div>
-          <span>{t("map.provisionLines")}</span>
+          <div
+            className="legend-color"
+            style={{
+              background:
+                "linear-gradient(to right, #a3be8c, #ebcb8b, #d08770, #bf616a)",
+              width: "80px",
+            }}
+          ></div>
+          <span>{t("map.intensityGradient")}</span>
         </div>
         <div className="legend-item">
           <div className="legend-color selected"></div>
@@ -700,7 +686,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
           <div className="legend-color default"></div>
           <span>{t("map.defaultCountry")}</span>
         </div>
-      </Legend>
+      </Legend> */}
     </MapWrapper>
   );
 };
