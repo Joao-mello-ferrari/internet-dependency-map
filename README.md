@@ -1,181 +1,171 @@
-# React + TypeScript + Vite
+# Internet Dependency Map - CDN Analysis System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Project Description
 
-Currently, two official plugins are available:
+An interactive web application for visualizing dependency and provision relationships between countries, CDNs, and content classes. This project is part of a research internship at the Federal University of Rio Grande (FURG), Systems Research Group.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Objective
 
-# Sistema de Análise de Dependências CDN
+Develop an interactive web application that displays dependency and provision relationships between countries, CDNs, and content classes using geographic visualizations (world map) and analytical filters.
 
-## Descrição do Projeto
-
-Este é um sistema web interativo desenvolvido como parte do estágio obrigatório na Universidade Federal do Rio Grande (FURG), no Grupo de Pesquisa Systems. O sistema exibe a relação de dependência e provisão de conteúdo entre países, CDNs e classes de conteúdo, utilizando visualizações geográficas e filtros analíticos.
-
-## Informações do Estágio
-
-- **Período**: 16/06/2025 a 08/08/2025
-- **Carga Horária**: 204 horas
-- **Instituição**: Universidade Federal do Rio Grande
-- **Setor**: Grupo de Pesquisa Systems
-
-## Objetivos
-
-### Objetivo Geral
-
-Desenvolver uma aplicação web interativa que exibe a relação de dependência e provisão de conteúdo entre países, CDNs, protocolos (IPv4/IPv6) e classes de conteúdo, utilizando visualizações geográficas (mapa-múndi) e filtros analíticos.
-
-### Objetivos Específicos
-
-- Implementar mapa interativo com suporte a clique por país
-- Exibir dados de dependência e provisão por classe de conteúdo
-- Comparar relações entre países e entre CDNs
-- Suportar análise por protocolo (IPv4 e IPv6)
-- Implementar filtros avançados e melhorias na aplicação
-
-## Tecnologias Utilizadas
+## Technology Stack
 
 - **Frontend**: React + TypeScript + Vite
-- **Visualização**: D3.js, Leaflet, Chart.js
+- **Visualization**: D3.js, Leaflet, Chart.js
 - **Styling**: Styled Components
-- **Mapas**: React-Leaflet
+- **Maps**: React-Leaflet
 - **Build Tool**: Vite
-- **Gerenciamento de Estado**: React Hooks
+- **State Management**: React Hooks
+- **Internationalization**: i18next + react-i18next (Portuguese/English)
+- **Linting**: ESLint with React, TypeScript, A11y, and Import ordering plugins
+- **Formatting**: Prettier with custom configuration
 
-## Funcionalidades
+## Features
 
-### ✅ Implementadas
+- **Interactive Map**: Country visualization on world map with Leaflet
+- **Country Click**: Select countries for detailed analysis
+- **Side Panel**: Detailed country information with statistics
+- **Advanced Filters**:
+  - Filter by relationship type (Dependency/Provision based on country role)
+  - Filter by CDN providers
+  - Filter by content class
+  - Filter by intensity (0-100% slider)
+- **Relationship Visualizations**:
+  - Colored arcs by intensity (green→yellow→orange→red gradient)
+  - Multiple relations between countries displayed with offsets
+  - Informative tooltips with relationship details
+- **Intensity System**: Composite calculation based on latency, bandwidth, and reliability
+- **Internationalization**: Full support for Portuguese and English with dynamic switching
+- **Mock Data**: 23 countries with multiple dependency relations
+- **Responsive Interface**: Adaptive design for different screen sizes
+- **Dark Theme**: Interface optimized for data analysis
+- **Code Quality**: ESLint + Prettier with strict rules
 
-- **Mapa Interativo**: Visualização de países em mapa-múndi
-- **Clique em Países**: Seleção de países para análise detalhada
-- **Painel Lateral**: Informações detalhadas do país selecionado
-- **Filtros Avançados**: Múltiplos filtros por países, CDNs, protocolos e classes
-- **Visualizações**: Gráficos de distribuição e estatísticas
-- **Dados Mockados**: Conjunto completo de dados de exemplo
-- **Interface Responsiva**: Design adaptativo para diferentes telas
-- **Tema Escuro**: Interface otimizada para análise de dados
-
-### 🔄 Em Desenvolvimento
-
-- Integração com dados reais do RIPE Atlas
-- Análise de latência e performance
-- Exportação de relatórios
-- Análise temporal de dados
-
-### 📋 Planejadas
-
-- Coleta automática de dados de CDNs
-- Algoritmos de análise de dependência
-- Dashboard de métricas em tempo real
-- API para integração com outros sistemas
-
-## Estrutura do Projeto
+## Project Structure
 
 ```
 src/
-├── components/          # Componentes React
-│   ├── WorldMap.tsx    # Mapa interativo principal
-│   ├── SidePanel.tsx   # Painel lateral de detalhes
-│   └── FilterPanel.tsx # Painel de filtros
+├── components/          # React components
+│   ├── WorldMap.tsx    # Main interactive map with Leaflet
+│   ├── SidePanel.tsx   # Country detail side panel
+│   └── FilterPanel.tsx # Advanced filters panel
 ├── data/
-│   └── mockData.ts     # Dados mockados para desenvolvimento
+│   └── mockData.ts     # Mock data (23 countries, relations)
 ├── types/
-│   ├── index.ts        # Definições de tipos TypeScript
-│   └── global.d.ts     # Declarações globais
-├── App.tsx             # Componente principal
-└── main.tsx           # Ponto de entrada
+│   ├── index.ts        # TypeScript type definitions
+│   └── global.d.ts     # Global declarations (Leaflet)
+├── locales/            # i18n translation files
+│   ├── en.json         # English translations
+│   └── pt.json         # Portuguese translations
+├── hooks/
+│   └── useTranslatedData.ts  # Hook for translated data
+├── utils/
+│   └── criticalityCalculator.ts  # Intensity calculation
+├── App.tsx             # Main component
+└── main.tsx           # Entry point
 ```
 
-## Como Executar
+## Getting Started
 
-### Pré-requisitos
+### Prerequisites
 
-- Node.js (versão 18 ou superior)
-- npm ou yarn
+- Node.js (version 18 or higher)
+- npm or yarn
 
-### Instalação e Execução
+### Installation and Execution
 
-1. **Clone o repositório e navegue para a pasta**:
+1. **Clone the repository**:
 
    ```bash
-   cd estagio
+   git clone https://github.com/Joao-mello-ferrari/internet-depency-map.git
+   cd internet-depency-map
    ```
 
-2. **Instale as dependências**:
+2. **Install dependencies**:
 
    ```bash
    npm install
    ```
 
-3. **Execute o servidor de desenvolvimento**:
+3. **Run the development server**:
 
    ```bash
    npm run dev
    ```
 
-4. **Acesse no navegador**:
+4. **Access in browser**:
    ```
    http://localhost:5173
    ```
 
-## Scripts Disponíveis
+## Available Scripts
 
-- `npm run dev` - Inicia o servidor de desenvolvimento
-- `npm run build` - Gera build de produção
-- `npm run preview` - Visualiza o build de produção
-- `npm run lint` - Executa verificação de lint
+- `npm run dev` - Start development server
+- `npm run build` - Generate production build
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint checks
 
-## Dados Mockados
+## Development Configuration
 
-O sistema atualmente utiliza dados mockados que incluem:
+### ESLint
 
-- **20 países** com coordenadas geográficas
-- **8 CDNs** (Cloudflare, Akamai, AWS, Google, Azure, etc.)
-- **8 classes de conteúdo** (Finanças, Saúde, Entretenimento, etc.)
-- **100+ relações** de dependência e provisão
-- **Métricas** de latência, largura de banda e confiabilidade
+The project uses ESLint with strict configuration:
 
-## Contribuição
+- TypeScript strict mode (`no-explicit-any`: error)
+- React Hooks rules
+- JSX Accessibility (a11y) checks
+- Automatic import ordering
+- Prettier integration
 
-Este projeto é parte de um estágio acadêmico. Sugestões e melhorias são bem-vindas através de issues e pull requests.
+### Prettier
 
-## Licença
+Automatic formatting with:
 
-Este projeto é desenvolvido para fins acadêmicos como parte do estágio obrigatório na FURG.
+- Single quotes
+- Semicolons
+- 2 spaces indentation
+- 80 characters line width
+- No trailing commas
 
-## Contato
+## Data Model
 
-- **Estudante**: João Mello
-- **Instituição**: Universidade Federal do Rio Grande (FURG)
-- **Grupo**: Sistemas de Pesquisa
-- **Período**: Junho - Agosto 2025
+### Countries (23 countries)
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+AR, AU, BR, CA, CO, CR, DE, DO, EG, ES, FR, GB, GT, ID, IN, IT, JP, MX, NG, NZ, PG, US, ZA
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+### Dependency Relations
 
-export default tseslint.config([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
-```
+Each relation has:
+
+- **Origin Country** (`originCountry`): Country that depends on content
+- **Host Country** (`hostCountry`): Country that hosts the content
+- **CDN Provider**: Cloudflare, Akamai, AWS CloudFront, Google Cloud CDN, etc.
+- **Content Class**: Finance, Health, Entertainment, E-commerce, Education, News, Social Media, Streaming
+- **Intensity**: Composite value (0-100%) based on:
+  - Latency (ms)
+  - Bandwidth (Mbps)
+  - Reliability (%)
+
+### Implemented Filters
+
+- **Relationship Type**:
+  - "Dependency" (country as origin)
+  - "Provision" (country as host)
+- **CDN Providers**: Multiple selection
+- **Content Class**: Finance, Health, Entertainment, etc.
+- **Intensity**: Range slider (0-100%)
+
+## Contributing
+
+This project is part of an academic internship. Suggestions and improvements are welcome through issues and pull requests.
+
+## License
+
+This project is developed for academic purposes as part of the mandatory internship at FURG.
+
+## Contact
+
+- **Student**: João Mello
+- **Institution**: Federal University of Rio Grande (FURG)
+- **Group**: Grupo de Pesquisa Sytems
+- **Period**: June - August 2025
