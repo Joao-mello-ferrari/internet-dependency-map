@@ -23,7 +23,7 @@ const FilterWrapper = styled.div<{ isOpen: boolean }>`
   border-right: 1px solid #4c566a;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
   transition: left 0.3s ease;
-  z-index: 1001;
+  z-index: 1004;
   overflow-y: auto;
   color: #eceff4;
 `;
@@ -40,7 +40,7 @@ const FilterToggle = styled.button<{ isOpen: boolean }>`
   border-radius: 0 8px 8px 0;
   cursor: pointer;
   transition: all 0.3s ease;
-  z-index: 1002;
+  z-index: 1005;
   font-size: 18px;
   writing-mode: vertical-lr;
   text-orientation: mixed;
@@ -56,7 +56,7 @@ const FilterHeader = styled.div`
   background: #3b4252;
   position: sticky;
   top: 0;
-  z-index: 1002;
+  z-index: 1004;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;

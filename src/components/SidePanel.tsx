@@ -7,7 +7,7 @@ import {
   LinearScale,
   BarElement
 } from 'chart.js';
-import React from 'react';
+import React, { useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -33,12 +33,14 @@ interface SidePanelProps {
   onClose: () => void;
 }
 
-const PanelWrapper = styled.div<{ isOpen: boolean }>`
+const PanelWrapper = styled.div<{ isOpen: boolean; collapsed: boolean }>`
   position: fixed;
-  top: 80px;
-  right: ${props => (props.isOpen ? '0' : '-400px')};
-  width: 400px;
-  height: calc(100vh - 80px);
+  top: ${props => (props.collapsed ? '100px' : '80px')};
+  right: ${props =>
+    props.isOpen ? (props.collapsed ? '20px' : '0') : '-400px'};
+  width: ${props => (props.collapsed ? '120px' : '400px')};
+  height: ${props => (props.collapsed ? '70px' : 'calc(100vh - 80px);')};
+  border-radius: ${props => (props.collapsed ? '8px' : '0')};
   background: #2e3440;
   border-left: 1px solid #4c566a;
   box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
@@ -48,7 +50,7 @@ const PanelWrapper = styled.div<{ isOpen: boolean }>`
   color: #eceff4;
 `;
 
-const PanelHeader = styled.div`
+const PanelHeader = styled.div<{ collapsed: boolean }>`
   padding: 20px;
   border-bottom: 1px solid #4c566a;
   background: #3b4252;
@@ -56,16 +58,27 @@ const PanelHeader = styled.div`
   top: 0;
   z-index: 1002;
 
+  display: flex;
+  flex-direction: ${props => (props.collapsed ? 'row-reverse' : 'row')};
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+
   h2 {
     margin: 0;
     color: #88c0d0;
     font-size: 20px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
   }
 
-  .close-btn {
+  div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .close-btn,
+  .collapse-btn {
     background: none;
     border: none;
     color: #d8dee9;
@@ -337,6 +350,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
 }) => {
   const { t } = useTranslation();
   const { getContentClassName } = useTranslatedData();
+  const [collapsed, setCollapsed] = useState(false);
 
   if (!selectedCountry) return null;
 
@@ -421,21 +435,34 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   };
 
   return (
-    <PanelWrapper isOpen={!!selectedCountry}>
-      <PanelHeader>
-        <h2>
-          {t(`countries.${selectedCountry}`)}
+    <PanelWrapper isOpen={!!selectedCountry} collapsed={collapsed}>
+      <PanelHeader collapsed={collapsed}>
+        <div>
+          <h2>{t(`countries.${selectedCountry}`)}</h2>
+          {!collapsed && (
+            <button className="collapse-btn" onClick={() => setCollapsed(true)}>
+              »
+            </button>
+          )}
+        </div>
+
+        {collapsed ? (
+          <button className="collapse-btn" onClick={() => setCollapsed(false)}>
+            «
+          </button>
+        ) : (
           <button className="close-btn" onClick={onClose}>
             ✕
           </button>
-        </h2>
+        )}
       </PanelHeader>
 
-      <PanelContent>
-        <Section>
-          <h3>{t('sidePanel.overview')}</h3>
-          <StatGrid>
-            {/* <StatCard className="dependency">
+      {!collapsed && (
+        <PanelContent>
+          <Section>
+            <h3>{t('sidePanel.overview')}</h3>
+            <StatGrid>
+              {/* <StatCard className="dependency">
               <div className="label">{t("sidePanel.dependencies")}</div>
               <div className="value">{dependencies.length}</div>
             </StatCard>
@@ -443,133 +470,138 @@ export const SidePanel: React.FC<SidePanelProps> = ({
               <div className="label">{t("sidePanel.provisions")}</div>
               <div className="value">{provisions.length}</div>
             </StatCard> */}
-            <StatCard>
-              <div className="label">
-                {t('sidePanel.totalVisibleRelations')}
-              </div>
-              <div className="value">{countryRelations.length}</div>
-            </StatCard>
-            <StatCard className="intensity">
-              <div className="label">
-                {t('sidePanel.criticalityLevel')}
-                <span className="info-icon">i</span>
-                <div className="tooltip">{t('sidePanel.intensityTooltip')}</div>
-              </div>
-              <div className="value">{avgIntensity}%</div>
-            </StatCard>
-          </StatGrid>
+              <StatCard>
+                <div className="label">
+                  {t('sidePanel.totalVisibleRelations')}
+                </div>
+                <div className="value">{countryRelations.length}</div>
+              </StatCard>
+              <StatCard className="intensity">
+                <div className="label">
+                  {t('sidePanel.criticalityLevel')}
+                  <span className="info-icon">i</span>
+                  <div className="tooltip">
+                    {t('sidePanel.intensityTooltip')}
+                  </div>
+                </div>
+                <div className="value">{avgIntensity}%</div>
+              </StatCard>
+            </StatGrid>
 
-          <ColorLegend>
-            <h4>{t('sidePanel.colorLegend')}</h4>
-            <div className="legend-item dependency">
-              <div className="color-indicator"></div>
-              <span>{t('sidePanel.moreIntense')}</span>
-            </div>
-            <div className="legend-item provision">
-              <div className="color-indicator"></div>
-              <span>{t('sidePanel.lessIntense')}</span>
-            </div>
-            <div className="intensity-spectrum">
-              <div className="spectrum-label">{t('map.criticality')}</div>
-              <div className="spectrum-bar"></div>
-              <div className="spectrum-labels">
-                <span>{t('filters.low')} (0%)</span>
-                <span>{t('filters.critical')} (100%)</span>
+            <ColorLegend>
+              <h4>{t('sidePanel.colorLegend')}</h4>
+              <div className="legend-item dependency">
+                <div className="color-indicator"></div>
+                <span>{t('sidePanel.moreIntense')}</span>
               </div>
-            </div>
-          </ColorLegend>
-        </Section>
-
-        <Section>
-          <h3>{t('sidePanel.contentClassDistribution')}</h3>
-          <ChartContainer>
-            <div className="chart-wrapper">
-              <div style={{ height: '200px' }}>
-                <Bar data={contentClassData} options={chartOptions} />
+              <div className="legend-item provision">
+                <div className="color-indicator"></div>
+                <span>{t('sidePanel.lessIntense')}</span>
               </div>
-            </div>
-          </ChartContainer>
-        </Section>
+              <div className="intensity-spectrum">
+                <div className="spectrum-label">{t('map.criticality')}</div>
+                <div className="spectrum-bar"></div>
+                <div className="spectrum-labels">
+                  <span>{t('filters.low')} (0%)</span>
+                  <span>{t('filters.critical')} (100%)</span>
+                </div>
+              </div>
+            </ColorLegend>
+          </Section>
 
-        <Section>
-          <h3>{t('sidePanel.detailedRelations')}</h3>
-          <RelationsList>
-            {countryRelations.length === 0 ? (
-              <p
-                style={{
-                  color: '#d8dee9',
-                  textAlign: 'center',
-                  fontStyle: 'italic'
-                }}
-              >
-                {t('sidePanel.noDependencies')}
-              </p>
-            ) : (
-              countryRelations.map((relation, index) => {
-                const isOutgoing = relation.originCountry === selectedCountry;
-                const otherCountry = isOutgoing
-                  ? relation.hostCountry
-                  : relation.originCountry;
-                const otherCountryName = t(`countries.${otherCountry}`);
-                const currentCountryName = t(`countries.${selectedCountry}`);
+          <Section>
+            <h3>{t('sidePanel.contentClassDistribution')}</h3>
+            <ChartContainer>
+              <div className="chart-wrapper">
+                <div style={{ height: '200px' }}>
+                  <Bar data={contentClassData} options={chartOptions} />
+                </div>
+              </div>
+            </ChartContainer>
+          </Section>
 
-                return (
-                  <RelationItem
-                    key={`${relation.originCountry}-${relation.hostCountry}-${index}`}
-                  >
-                    <div className="relation-header">
-                      <strong>
-                        {isOutgoing
-                          ? `${currentCountryName} → ${otherCountryName}`
-                          : `${otherCountryName} → ${currentCountryName}`}
-                      </strong>
-                      <span className={`relation-type dependency`}>
-                        {isOutgoing
-                          ? t('sidePanel.dependsOnRelation')
-                          : t('sidePanel.receivesDependency')}
-                      </span>
-                    </div>
-                    <div className="relation-details">
-                      <div className="detail-row">
-                        <span>{t('sidePanel.cdnLabel')}</span>
-                        <span>
-                          {cdns.find(cdn => cdn.id === relation.cdnProvider)
-                            ?.name || relation.cdnProvider}
+          <Section>
+            <h3>{t('sidePanel.detailedRelations')}</h3>
+            <RelationsList>
+              {countryRelations.length === 0 ? (
+                <p
+                  style={{
+                    color: '#d8dee9',
+                    textAlign: 'center',
+                    fontStyle: 'italic'
+                  }}
+                >
+                  {t('sidePanel.noDependencies')}
+                </p>
+              ) : (
+                countryRelations.map((relation, index) => {
+                  const isOutgoing = relation.originCountry === selectedCountry;
+                  const otherCountry = isOutgoing
+                    ? relation.hostCountry
+                    : relation.originCountry;
+                  const otherCountryName = t(`countries.${otherCountry}`);
+                  const currentCountryName = t(`countries.${selectedCountry}`);
+
+                  return (
+                    <RelationItem
+                      key={`${relation.originCountry}-${relation.hostCountry}-${index}`}
+                    >
+                      <div className="relation-header">
+                        <strong>
+                          {isOutgoing
+                            ? `${currentCountryName} → ${otherCountryName}`
+                            : `${otherCountryName} → ${currentCountryName}`}
+                        </strong>
+                        <span className={`relation-type dependency`}>
+                          {isOutgoing
+                            ? t('sidePanel.dependsOnRelation')
+                            : t('sidePanel.receivesDependency')}
                         </span>
                       </div>
-                      <div className="detail-row">
-                        <span>{t('sidePanel.classLabel')}</span>
-                        <span>
-                          {t(`contentClassCategories.${relation.contentClass}`)}
-                        </span>
+                      <div className="relation-details">
+                        <div className="detail-row">
+                          <span>{t('sidePanel.cdnLabel')}</span>
+                          <span>
+                            {cdns.find(cdn => cdn.id === relation.cdnProvider)
+                              ?.name || relation.cdnProvider}
+                          </span>
+                        </div>
+                        <div className="detail-row">
+                          <span>{t('sidePanel.classLabel')}</span>
+                          <span>
+                            {t(
+                              `contentClassCategories.${relation.contentClass}`
+                            )}
+                          </span>
+                        </div>
+                        <div className="detail-row">
+                          <span>{t('sidePanel.criticalityLabel')}</span>
+                          <span
+                            style={{
+                              color:
+                                relation.intensity > 70
+                                  ? '#bf616a'
+                                  : relation.intensity > 40
+                                    ? '#ebcb8b'
+                                    : '#a3be8c'
+                            }}
+                          >
+                            {relation.intensity}%
+                          </span>
+                        </div>
+                        <div className="detail-row">
+                          <span>{t('sidePanel.protocolLabel')}</span>
+                          <span>{relation.protocol.type}</span>
+                        </div>
                       </div>
-                      <div className="detail-row">
-                        <span>{t('sidePanel.criticalityLabel')}</span>
-                        <span
-                          style={{
-                            color:
-                              relation.intensity > 70
-                                ? '#bf616a'
-                                : relation.intensity > 40
-                                  ? '#ebcb8b'
-                                  : '#a3be8c'
-                          }}
-                        >
-                          {relation.intensity}%
-                        </span>
-                      </div>
-                      <div className="detail-row">
-                        <span>{t('sidePanel.protocolLabel')}</span>
-                        <span>{relation.protocol.type}</span>
-                      </div>
-                    </div>
-                  </RelationItem>
-                );
-              })
-            )}
-          </RelationsList>
-        </Section>
-      </PanelContent>
+                    </RelationItem>
+                  );
+                })
+              )}
+            </RelationsList>
+          </Section>
+        </PanelContent>
+      )}
     </PanelWrapper>
   );
 };
