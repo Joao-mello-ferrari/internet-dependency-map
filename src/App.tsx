@@ -109,6 +109,7 @@ const Header = styled.header`
     top: 0;
     left: 0;
     right: 0;
+    padding-left: 55px;
   }
 
   .header-content {
