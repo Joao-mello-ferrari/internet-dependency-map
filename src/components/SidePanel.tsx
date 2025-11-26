@@ -38,7 +38,7 @@ const PanelWrapper = styled.div<{ isOpen: boolean; collapsed: boolean }>`
   top: ${props => (props.collapsed ? '100px' : '80px')};
   right: ${props =>
     props.isOpen ? (props.collapsed ? '20px' : '0') : '-400px'};
-  width: ${props => (props.collapsed ? '120px' : '400px')};
+  width: ${props => (props.collapsed ? 'fit-content' : '400px')};
   height: ${props => (props.collapsed ? '70px' : 'calc(100vh - 80px);')};
   border-radius: ${props => (props.collapsed ? '8px' : '0')};
   background: #2e3440;
@@ -48,6 +48,12 @@ const PanelWrapper = styled.div<{ isOpen: boolean; collapsed: boolean }>`
   z-index: 1001;
   overflow-y: auto;
   color: #eceff4;
+
+  @media (max-width: 600px) {
+    top: ${props => (props.collapsed ? '120px' : '100px')};
+    height: ${props => (props.collapsed ? '70px' : 'calc(100vh - 100px);')};
+    overflow-y: hidden;
+  }
 `;
 
 const PanelHeader = styled.div<{ collapsed: boolean }>`

@@ -26,6 +26,11 @@ const FilterWrapper = styled.div<{ isOpen: boolean }>`
   z-index: 1004;
   overflow-y: auto;
   color: #eceff4;
+
+  @media (max-width: 600px) {
+    top: 100px;
+    height: calc(100vh - 100px);
+  }
 `;
 
 const FilterToggle = styled.button<{ isOpen: boolean }>`

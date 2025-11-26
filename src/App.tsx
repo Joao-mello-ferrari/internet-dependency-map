@@ -100,6 +100,13 @@ const Header = styled.header`
   justify-content: space-between;
   align-items: center;
 
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    height: 100px;
+  }
+
   .header-content {
     flex: 1;
   }
@@ -109,6 +116,10 @@ const Header = styled.header`
     font-size: 24px;
     font-weight: 600;
     margin: 0;
+
+    @media (max-width: 600px) {
+      font-size: 16px;
+    }
   }
 
   .subtitle {
@@ -116,6 +127,10 @@ const Header = styled.header`
     font-size: 14px;
     margin-top: 5px;
     font-weight: 300;
+
+    @media (max-width: 600px) {
+      font-size: 10px;
+    }
   }
 
   .project-info {
@@ -126,6 +141,15 @@ const Header = styled.header`
     font-size: 12px;
     color: #81a1c1;
     margin-left: 20px;
+
+    @media (max-width: 600px) {
+      flex-direction: row-reverse;
+      justify-content: space-between;
+      font-size: 10px;
+      margin-left: 0;
+      width: 100%;
+      margin-top: 8px;
+    }
   }
 `;
 
@@ -135,6 +159,10 @@ const MapContainer = styled.div`
   overflow: hidden;
   height: calc(100vh - 80px);
   width: 100vw;
+
+  @media (max-width: 600px) {
+    height: calc(100vh - 100px);
+  }
 `;
 
 const LoadingOverlay = styled.div<{ visible: boolean }>`
