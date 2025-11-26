@@ -105,6 +105,10 @@ const Header = styled.header`
     align-items: flex-start;
     justify-content: center;
     height: 100px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
   }
 
   .header-content {
